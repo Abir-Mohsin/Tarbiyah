@@ -198,3 +198,32 @@ document.getElementById('confirm-assign')?.addEventListener('click', async () =>
         alert("Assigned!"); document.getElementById('course-modal').classList.add('hidden'); loadUsers();
     }
 });
+
+// admin.js এর একদম নিচে যোগ করুন
+
+// Theme & Branding Settings Save
+const themeForm = document.getElementById('theme-settings-form');
+themeForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        const themeData = {
+            siteName: document.getElementById('s-name').value || "Tarbiyah",
+            logoImg: document.getElementById('s-logo-img').value || "",
+            primaryColor: document.getElementById('s-primary-color').value || "#1B4332",
+            accentColor: document.getElementById('s-accent-color').value || "#D4AF37",
+            fontUrl: document.getElementById('s-font-url').value || ""
+        };
+
+        // Settings কালেকশনে theme নামের ডকুমেন্টে সেভ হবে
+        await setDoc(doc(db, "Settings", "theme"), themeData);
+        alert("MashaAllah! Theme and Branding Updated Successfully.");
+    } catch (error) {
+        console.error("Theme Update Error: ", error);
+        alert("Failed to update theme.");
+    }
+});
+
+// অ্যাডমিন প্যানেলে Theme ট্যাব ওপেন করার ইভেন্ট
+document.getElementById('tab-theme-settings')?.addEventListener('click', () => { 
+    showSection('theme-settings-view'); 
+});
