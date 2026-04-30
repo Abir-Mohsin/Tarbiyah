@@ -52,7 +52,8 @@
                 <li id="tab-manage-courses">Courses (Public)</li>
                 <li id="tab-add-video">Lessons (Internal)</li>
                 <li id="tab-manage-blogs">Blog Articles</li>
-                <li id="tab-settings">Site Settings</li>
+                <li id="tab-manage-teachers">Teachers Management</li>
+                <li id="tab-settings">Site Settings</li>                
                 <li onclick="location.reload()" style="color: red; margin-top: 50px;">Logout</li>
             </ul>
         </aside>
@@ -115,12 +116,33 @@
             <div id="manage-blogs-view" class="admin-card hidden">
                 <h3>Post a New Blog</h3>
                 <form id="blog-upload-form">
+                    <input type="hidden" id="edit-blog-id">
                     <div class="form-group"><label>Title</label><input type="text" id="b-title" required></div>
                     <div class="form-group"><label>Cover Image URL</label><input type="text" id="b-img" required></div>
                     <div class="form-group"><label>Content (Full Article)</label><textarea id="b-content" rows="10" required></textarea></div>
                     <button type="submit" class="btn">Publish Blog Article</button>
                 </form>
             </div>
+
+            <!-- Teachers Management -->
+            <div id="manage-teachers-view" class="admin-card hidden">
+    <h3>Manage Teachers</h3>
+    <form id="teacher-upload-form" class="grid">
+        <input type="hidden" id="edit-teacher-id">
+        <input type="text" id="t-name" placeholder="Teacher Name" required>
+        <input type="text" id="t-subject" placeholder="Subject/Designation" required>
+        <input type="text" id="t-img" placeholder="Image URL" required>
+        <textarea id="t-bio" placeholder="Short Biography" style="grid-column: span 2;"></textarea>
+        <button type="submit" id="teacher-sub-btn" class="btn">Add Teacher</button>
+    </form>
+    <div class="table-wrapper">
+        <h4>Existing Teachers</h4>
+        <table>
+            <thead><tr><th>Name</th><th>Subject</th><th>Action</th></tr></thead>
+            <tbody id="teachers-table-body"></tbody>
+        </table>
+    </div>
+    </div>
 
             <!-- Site Settings View -->
             <div id="settings-view" class="admin-card hidden">

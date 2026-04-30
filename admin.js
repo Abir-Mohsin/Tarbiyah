@@ -209,3 +209,123 @@ document.getElementById('tab-manage-blogs')?.addEventListener('click', () => {
     showSection('manage-blogs-view'); 
     loadBlogs(); // এটি যোগ করতে হবে
 });
+
+import { deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// --- ১. ব্লগ ডিলিট এবং এডিট লজিক ---
+
+// ডিলিট ফাংশন
+window.deleteBlog = async (id) => {
+    if(confirm("Are you sure you want to delete this article?")) {
+        await deleteDoc(doc(db, "Blogs", id));
+        alert("Blog Deleted!");
+        loadBlogs();
+    }
+}
+
+// এডিট করার জন্য ফর্ম পূরণ করা
+window.editBlog = async (id) => {
+    const docSnap = await getDoc(doc(db, "Blogs", id));
+    if (docSnap.exists()) {
+        const blog = docSnap.data();
+        document.getElementById('b-title').value = blog.title;
+        document.getElementById('b-img').value = blog.image;
+        document.getElementById('b-content').value = blog.content;
+        document.getElementById('edit-blog-id').value = id; // আইডি সেভ রাখা
+        document.querySelector('#manage-blogs-view h3').innerText = "Edit Blog Article";
+        window.scrollTo(0, 0);
+    }
+}
+
+// ব্লগ সেভ লজিক (Update/Create) আপডেট
+const blogForm = document.getElementById('blog-upload-form');
+blogForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const editId = document.getElementById('edit-blog-id').value;
+    const blogData = {
+        title: document.getElementById('b-title').value,
+        image: document.getElementById('b-img').value,
+        content: document.getElementById('b-content').value,
+        createdAt: new Date()
+    };
+
+    try {
+        if (editId) {
+            await updateDoc(doc(db, "Blogs", editId), blogData);
+            alert("Blog Updated!");
+        } else {
+            await addDoc(collection(db, "Blogs"), blogData);
+            alert("Blog Published!");
+        }
+        blogForm.reset();
+        document.getElementById('edit-blog-id').value = "";
+        loadBlogs();
+    } catch (e) { alert("Error!"); }
+});
+
+// --- ২. টিচার ম্যানেজমেন্ট লজিক ---
+
+const teacherForm = document.getElementById('teacher-upload-form');
+teacherForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const editId = document.getElementById('edit-teacher-id').value;
+    const teacherData = {
+        name: document.getElementById('t-name').value,
+        subject: document.getElementById('t-subject').value,
+        image: document.getElementById('t-img').value,
+        bio: document.getElementById('t-bio').value
+    };
+
+    if (editId) {
+        await updateDoc(doc(db, "Teachers", editId), teacherData);
+    } else {
+        await addDoc(collection(db, "Teachers"), teacherData);
+    }
+    alert("Teacher Info Saved!");
+    teacherForm.reset();
+    document.getElementById('edit-teacher-id').value = "";
+    loadTeachers();
+});
+
+async function loadTeachers() {
+    const tbody = document.getElementById('teachers-table-body');
+    if(!tbody) return;
+    const snap = await getDocs(collection(db, "Teachers"));
+    tbody.innerHTML = '';
+    snap.forEach(tDoc => {
+        const t = tDoc.data();
+        tbody.innerHTML += `
+            <tr>
+                <td>${t.name}</td>
+                <td>${t.subject}</td>
+                <td>
+                    <button onclick="editTeacher('${tDoc.id}')" class="btn" style="padding:5px;">Edit</button>
+                    <button onclick="deleteTeacher('${tDoc.id}')" class="btn" style="background:red; padding:5px;">Delete</button>
+                </td>
+            </tr>`;
+    });
+}
+
+window.deleteTeacher = async (id) => {
+    if(confirm("Delete this teacher?")) {
+        await deleteDoc(doc(db, "Teachers", id));
+        loadTeachers();
+    }
+}
+
+window.editTeacher = async (id) => {
+    const snap = await getDoc(doc(db, "Teachers", id));
+    const t = snap.data();
+    document.getElementById('t-name').value = t.name;
+    document.getElementById('t-subject').value = t.subject;
+    document.getElementById('t-img').value = t.image;
+    document.getElementById('t-bio').value = t.bio;
+    document.getElementById('edit-teacher-id').value = id;
+    window.scrollTo(0,0);
+}
+
+// ট্যাব লজিক আপডেট
+document.getElementById('tab-manage-teachers')?.addEventListener('click', () => { 
+    showSection('manage-teachers-view'); 
+    loadTeachers(); 
+});
