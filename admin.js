@@ -1,11 +1,11 @@
 /* 
-   Tarbiyah Admin Master Logic
-   সবগুলো ফিচার এখানে একসাথে গুছিয়ে দেওয়া হয়েছে।
+   Tarbiyah Admin Master Script - Final Fixed Version
+   ফিচার: Admissions, Users, Courses, Videos, Blogs, Teachers, Settings.
 */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
-    getFirestore, collection, getDocs, addDoc, updateDoc, setDoc, doc, arrayUnion, query, orderBy, onSnapshot 
+    getFirestore, collection, getDocs, addDoc, updateDoc, setDoc, doc, deleteDoc, getDoc, arrayUnion, query, orderBy 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ১. ফায়ারবেস কনফিগারেশন
@@ -26,252 +26,82 @@ const db = getFirestore(app);
 const loginBtn = document.getElementById('login-btn');
 const passwordInput = document.getElementById('admin-pass');
 const loginSection = document.getElementById('login-section');
-const adminWrapper = document.querySelector('.admin-wrapper'); // সাইডবারসহ মেইন এরিয়া
+const adminWrapper = document.querySelector('.admin-wrapper');
 const ADMIN_PASSWORD = "admin123"; 
 
 if (loginBtn) {
     loginBtn.addEventListener('click', () => {
         if (passwordInput.value === ADMIN_PASSWORD) {
             loginSection.classList.add('hidden');
-            adminWrapper.classList.remove('hidden');
-            loadAdmissions(); // ডিফল্টভাবে প্রথম ডাটা লোড হবে
+            if(adminWrapper) adminWrapper.classList.remove('hidden');
+            loadAdmissions();
         } else {
             document.getElementById('error-msg').style.display = 'block';
         }
     });
 }
 
-// ৩. সাইডবার সেকশন কন্ট্রোল (এখানেই এররটি ছিল, এখন এটি ইউনিক)
+// ৩. সাইডবার ট্যাব পরিবর্তন লজিক
 function showSection(id) {
-    // সব কার্ড হাইড করা
     document.querySelectorAll('.admin-card').forEach(card => card.classList.add('hidden'));
-    // সব ট্যাব থেকে একটিভ ক্লাস সরানো
     document.querySelectorAll('.sidebar-links li').forEach(li => li.classList.remove('active'));
     
-    // নির্দিষ্ট কার্ডটি দেখানো
-    const targetSection = document.getElementById(id);
-    if(targetSection) targetSection.classList.remove('hidden');
+    const target = document.getElementById(id);
+    if(target) target.classList.remove('hidden');
 
-    // সাইডবার বাটনে একটিভ ক্লাস দেওয়া
     const tabId = "tab-" + id.replace('-view', '');
     const activeTab = document.getElementById(tabId);
     if(activeTab) activeTab.classList.add('active');
 }
 
-// ৪. ট্যাব বাটন লিসেনারস
+// ট্যাব বাটন লিসেনারস
 document.getElementById('tab-admissions')?.addEventListener('click', () => { showSection('admissions-view'); loadAdmissions(); });
 document.getElementById('tab-users')?.addEventListener('click', () => { showSection('users-view'); loadUsers(); });
 document.getElementById('tab-manage-courses')?.addEventListener('click', () => showSection('manage-courses-view'));
 document.getElementById('tab-add-video')?.addEventListener('click', () => showSection('add-video-view'));
-document.getElementById('tab-manage-blogs')?.addEventListener('click', () => showSection('manage-blogs-view'));
+document.getElementById('tab-manage-blogs')?.addEventListener('click', () => { showSection('manage-blogs-view'); loadBlogs(); });
+document.getElementById('tab-manage-teachers')?.addEventListener('click', () => { showSection('manage-teachers-view'); loadTeachers(); });
 document.getElementById('tab-settings')?.addEventListener('click', () => showSection('settings-view'));
 
-// ৫. ডাটাবেস থেকে ডাটা লোড করার ফাংশনসমূহ
+// ৪. ডাটা লোড করার ফাংশনসমূহ (Blogs, Teachers, Users, Admissions)
 
 async function loadAdmissions() {
     const tbody = document.querySelector('#admissions-table tbody');
     if(!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
     const snap = await getDocs(collection(db, "Admissions"));
     tbody.innerHTML = '';
     snap.forEach(doc => {
-        const data = doc.data();
-        tbody.innerHTML += `<tr><td>${data.name}</td><td>${data.email}</td><td>${data.course}</td><td>${data.trxId}</td></tr>`;
+        const d = doc.data();
+        tbody.innerHTML += `<tr><td>${d.name}</td><td>${d.email}</td><td>${d.course}</td><td>${d.trxId}</td></tr>`;
     });
 }
 
 async function loadUsers() {
     const tbody = document.querySelector('#users-table tbody');
     if(!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
     const snap = await getDocs(collection(db, "Users"));
     tbody.innerHTML = '';
     snap.forEach(userDoc => {
-        const user = userDoc.data();
-        const courses = user.myCourses ? user.myCourses.join(", ") : "None";
-        tbody.innerHTML += `<tr>
-            <td>${user.name}</td><td>${user.email}</td><td>${courses}</td>
-            <td><button class="btn" onclick="openAssignModal('${userDoc.id}')" style="padding:5px;">Assign Course</button></td>
-        </tr>`;
+        const u = userDoc.data();
+        const courses = u.myCourses ? u.myCourses.join(", ") : "None";
+        tbody.innerHTML += `<tr><td>${u.name}</td><td>${u.email}</td><td>${courses}</td><td><button class="btn" onclick="openAssignModal('${userDoc.id}')">Assign</button></td></tr>`;
     });
 }
 
-// ৬. কোর্স অ্যাসাইন (Modal) লজিক
-let selectedUserUid = "";
-window.openAssignModal = (uid) => {
-    selectedUserUid = uid;
-    document.getElementById('course-modal').classList.remove('hidden');
-};
-
-document.getElementById('confirm-assign')?.addEventListener('click', async () => {
-    const courseName = document.getElementById('select-course').value;
-    if (selectedUserUid) {
-        const userRef = doc(db, "Users", selectedUserUid);
-        await updateDoc(userRef, {
-            myCourses: arrayUnion(courseName),
-            status: "Active"
-        });
-        alert("Course assigned successfully!");
-        document.getElementById('course-modal').classList.add('hidden');
-        loadUsers();
-    }
-});
-
-// ৭. আপলোড ফাংশনসমূহ (Video, Course, Blog, Settings)
-
-// ভিডিও আপলোড
-const videoForm = document.getElementById('video-upload-form');
-videoForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await addDoc(collection(db, "Videos"), {
-        title: document.getElementById('v-title').value,
-        url: `https://www.youtube.com/embed/${document.getElementById('v-url').value}`,
-        course: document.getElementById('v-course').value,
-        order: parseInt(document.getElementById('v-order').value)
-    });
-    alert("Lesson Added!");
-    videoForm.reset();
-});
-
-// পাবলিক কোর্স পাবলিশ
-const courseForm = document.getElementById('course-create-form');
-courseForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await addDoc(collection(db, "Courses"), {
-        title: document.getElementById('c-title').value,
-        tag: document.getElementById('c-tag').value,
-        image: document.getElementById('c-img').value,
-        price: document.getElementById('c-price').value,
-        description: document.getElementById('c-desc').value,
-        createdAt: new Date()
-    });
-    alert("Course Published!");
-    courseForm.reset();
-});
-
-// সেটিংস আপডেট
-const settingsForm = document.getElementById('settings-form');
-settingsForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await setDoc(doc(db, "Settings", "global"), {
-        siteName: document.getElementById('s-name').value,
-        announcement: document.getElementById('s-announcement').value
-    });
-    alert("Settings Updated!");
-});
-
-// ১. ব্লগ ডাটা লোড করার ফাংশন
 async function loadBlogs() {
-    const tbody = document.querySelector('#blogs-table-body'); // এই আইডিটি HTML-এ থাকতে হবে
+    const tbody = document.getElementById('blogs-table-body');
     if(!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="3">Loading articles...</td></tr>';
-    
-    try {
-        const q = query(collection(db, "Blogs"), orderBy("createdAt", "desc"));
-        const snap = await getDocs(q);
-        tbody.innerHTML = '';
-        
-        if(snap.empty) {
-            tbody.innerHTML = '<tr><td colspan="3">No blogs published yet.</td></tr>';
-            return;
-        }
-
-        snap.forEach(blogDoc => {
-            const blog = blogDoc.data();
-            tbody.innerHTML += `
-                <tr>
-                    <td>${blog.title}</td>
-                    <td><img src="${blog.image}" style="width:50px; height:30px; object-fit:cover;"></td>
-                    <td><button class="btn" onclick="deleteBlog('${blogDoc.id}')" style="background:red; padding:5px;">Delete</button></td>
-                </tr>`;
-        });
-    } catch (e) {
-        tbody.innerHTML = '<tr><td colspan="3" style="color:red;">Error loading blogs!</td></tr>';
-    }
+    const q = query(collection(db, "Blogs"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    tbody.innerHTML = '';
+    snap.forEach(bDoc => {
+        const b = bDoc.data();
+        tbody.innerHTML += `<tr><td>${b.title}</td><td><img src="${b.image}" width="50"></td><td>
+            <button class="btn" onclick="editBlog('${bDoc.id}')" style="padding:5px;">Edit</button>
+            <button class="btn" onclick="deleteBlog('${bDoc.id}')" style="padding:5px; background:red;">Delete</button>
+        </td></tr>`;
+    });
 }
-
-// ২. ট্যাব ক্লিক ইভেন্ট আপডেট
-document.getElementById('tab-manage-blogs')?.addEventListener('click', () => { 
-    showSection('manage-blogs-view'); 
-    loadBlogs(); // এটি যোগ করতে হবে
-});
-
-import { deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-// --- ১. ব্লগ ডিলিট এবং এডিট লজিক ---
-
-// ডিলিট ফাংশন
-window.deleteBlog = async (id) => {
-    if(confirm("Are you sure you want to delete this article?")) {
-        await deleteDoc(doc(db, "Blogs", id));
-        alert("Blog Deleted!");
-        loadBlogs();
-    }
-}
-
-// এডিট করার জন্য ফর্ম পূরণ করা
-window.editBlog = async (id) => {
-    const docSnap = await getDoc(doc(db, "Blogs", id));
-    if (docSnap.exists()) {
-        const blog = docSnap.data();
-        document.getElementById('b-title').value = blog.title;
-        document.getElementById('b-img').value = blog.image;
-        document.getElementById('b-content').value = blog.content;
-        document.getElementById('edit-blog-id').value = id; // আইডি সেভ রাখা
-        document.querySelector('#manage-blogs-view h3').innerText = "Edit Blog Article";
-        window.scrollTo(0, 0);
-    }
-}
-
-// ব্লগ সেভ লজিক (Update/Create) আপডেট
-const blogForm = document.getElementById('blog-upload-form');
-blogForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const editId = document.getElementById('edit-blog-id').value;
-    const blogData = {
-        title: document.getElementById('b-title').value,
-        image: document.getElementById('b-img').value,
-        content: document.getElementById('b-content').value,
-        createdAt: new Date()
-    };
-
-    try {
-        if (editId) {
-            await updateDoc(doc(db, "Blogs", editId), blogData);
-            alert("Blog Updated!");
-        } else {
-            await addDoc(collection(db, "Blogs"), blogData);
-            alert("Blog Published!");
-        }
-        blogForm.reset();
-        document.getElementById('edit-blog-id').value = "";
-        loadBlogs();
-    } catch (e) { alert("Error!"); }
-});
-
-// --- ২. টিচার ম্যানেজমেন্ট লজিক ---
-
-const teacherForm = document.getElementById('teacher-upload-form');
-teacherForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const editId = document.getElementById('edit-teacher-id').value;
-    const teacherData = {
-        name: document.getElementById('t-name').value,
-        subject: document.getElementById('t-subject').value,
-        image: document.getElementById('t-img').value,
-        bio: document.getElementById('t-bio').value
-    };
-
-    if (editId) {
-        await updateDoc(doc(db, "Teachers", editId), teacherData);
-    } else {
-        await addDoc(collection(db, "Teachers"), teacherData);
-    }
-    alert("Teacher Info Saved!");
-    teacherForm.reset();
-    document.getElementById('edit-teacher-id').value = "";
-    loadTeachers();
-});
 
 async function loadTeachers() {
     const tbody = document.getElementById('teachers-table-body');
@@ -280,24 +110,66 @@ async function loadTeachers() {
     tbody.innerHTML = '';
     snap.forEach(tDoc => {
         const t = tDoc.data();
-        tbody.innerHTML += `
-            <tr>
-                <td>${t.name}</td>
-                <td>${t.subject}</td>
-                <td>
-                    <button onclick="editTeacher('${tDoc.id}')" class="btn" style="padding:5px;">Edit</button>
-                    <button onclick="deleteTeacher('${tDoc.id}')" class="btn" style="background:red; padding:5px;">Delete</button>
-                </td>
-            </tr>`;
+        tbody.innerHTML += `<tr><td>${t.name}</td><td>${t.subject}</td><td>
+            <button class="btn" onclick="editTeacher('${tDoc.id}')" style="padding:5px;">Edit</button>
+            <button class="btn" onclick="deleteTeacher('${tDoc.id}')" style="padding:5px; background:red;">Delete</button>
+        </td></tr>`;
     });
 }
 
-window.deleteTeacher = async (id) => {
-    if(confirm("Delete this teacher?")) {
-        await deleteDoc(doc(db, "Teachers", id));
-        loadTeachers();
-    }
-}
+// ৫. ফর্ম সাবমিশন লজিক (Add/Update)
+
+// ব্লগ সেভ
+const bForm = document.getElementById('blog-upload-form');
+bForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const editId = document.getElementById('edit-blog-id').value;
+    const data = { title: document.getElementById('b-title').value, image: document.getElementById('b-img').value, content: document.getElementById('b-content').value, createdAt: new Date() };
+    if (editId) await updateDoc(doc(db, "Blogs", editId), data);
+    else await addDoc(collection(db, "Blogs"), data);
+    alert("Saved!"); bForm.reset(); document.getElementById('edit-blog-id').value = ""; loadBlogs();
+});
+
+// টিচার সেভ
+const tForm = document.getElementById('teacher-upload-form');
+tForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const editId = document.getElementById('edit-teacher-id').value;
+    const data = { name: document.getElementById('t-name').value, subject: document.getElementById('t-subject').value, image: document.getElementById('t-img').value, bio: document.getElementById('t-bio').value };
+    if (editId) await updateDoc(doc(db, "Teachers", editId), data);
+    else await addDoc(collection(db, "Teachers"), data);
+    alert("Saved!"); tForm.reset(); document.getElementById('edit-teacher-id').value = ""; loadTeachers();
+});
+
+// ভিডিও সেভ
+document.getElementById('video-upload-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await addDoc(collection(db, "Videos"), { title: document.getElementById('v-title').value, url: `https://www.youtube.com/embed/${document.getElementById('v-url').value}`, course: document.getElementById('v-course').value, order: parseInt(document.getElementById('v-order').value) });
+    alert("Video Added!"); e.target.reset();
+});
+
+// কোর্স কার্ড সেভ
+document.getElementById('course-create-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await addDoc(collection(db, "Courses"), { title: document.getElementById('c-title').value, tag: document.getElementById('c-tag').value, image: document.getElementById('c-img').value, price: document.getElementById('c-price').value, description: document.getElementById('c-desc').value, createdAt: new Date() });
+    alert("Course Published!"); e.target.reset();
+});
+
+// ৬. গ্লোবাল ফাংশনস (Window Object) যাতে HTML থেকে কাজ করে
+
+window.editBlog = async (id) => {
+    const snap = await getDoc(doc(db, "Blogs", id));
+    const b = snap.data();
+    document.getElementById('b-title').value = b.title;
+    document.getElementById('b-img').value = b.image;
+    document.getElementById('b-content').value = b.content;
+    document.getElementById('edit-blog-id').value = id;
+    window.scrollTo(0,0);
+};
+
+window.deleteBlog = async (id) => {
+    if(confirm("Delete blog?")) { await deleteDoc(doc(db, "Blogs", id)); loadBlogs(); }
+};
 
 window.editTeacher = async (id) => {
     const snap = await getDoc(doc(db, "Teachers", id));
@@ -308,10 +180,21 @@ window.editTeacher = async (id) => {
     document.getElementById('t-bio').value = t.bio;
     document.getElementById('edit-teacher-id').value = id;
     window.scrollTo(0,0);
-}
+};
 
-// ট্যাব লজিক আপডেট
-document.getElementById('tab-manage-teachers')?.addEventListener('click', () => { 
-    showSection('manage-teachers-view'); 
-    loadTeachers(); 
+window.deleteTeacher = async (id) => {
+    if(confirm("Delete teacher?")) { await deleteDoc(doc(db, "Teachers", id)); loadTeachers(); }
+};
+
+window.openAssignModal = (uid) => {
+    window.selectedUserUid = uid;
+    document.getElementById('course-modal').classList.remove('hidden');
+};
+
+document.getElementById('confirm-assign')?.addEventListener('click', async () => {
+    const courseName = document.getElementById('select-course').value;
+    if (window.selectedUserUid) {
+        await updateDoc(doc(db, "Users", window.selectedUserUid), { myCourses: arrayUnion(courseName), status: "Active" });
+        alert("Assigned!"); document.getElementById('course-modal').classList.add('hidden'); loadUsers();
+    }
 });

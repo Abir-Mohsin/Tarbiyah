@@ -3,64 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarbiyah | Professional Admin</title>
+    <title>Tarbiyah | Master Admin OS</title>
     <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome for Icons (মেনুতে আইকন দেখানোর জন্য) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* অ্যাডমিন লেআউটের বিশেষ স্টাইল */
-        .admin-wrapper { display: flex; min-height: 100vh; }
+        .admin-wrapper { display: flex; min-height: 100vh; background: #f4f7f6; }
         
-        /* সাইডবার ডিজাইন */
-        aside {
-            width: 250px; background: var(--footer-bg); color: white;
-            padding: 20px; position: sticky; top: 0; height: 100vh;
-        }
-        aside h2 { color: var(--soft-gold); margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .sidebar-links li { margin-bottom: 15px; cursor: pointer; padding: 10px; border-radius: 5px; transition: 0.3s; }
-        .sidebar-links li:hover, .sidebar-links li.active { background: var(--primary-green); color: var(--soft-gold); }
+        /* Advanced Sidebar */
+        aside { width: 260px; background: #1a1a2e; color: #fff; padding: 20px 0; height: 100vh; position: sticky; top: 0; overflow-y: auto; }
+        .admin-logo { text-align: center; margin-bottom: 20px; padding: 0 20px; border-bottom: 1px solid #2f2f45; padding-bottom: 20px; }
+        .admin-logo h2 { color: #e9c46a; font-size: 1.5rem; }
         
-        /* মেইন কন্টেন্ট এরিয়া */
-        .admin-main { flex: 1; padding: 30px; background: var(--bg-light); overflow-y: auto; }
-        .admin-card { background: var(--card-bg); padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .sidebar-links { list-style: none; padding: 0; }
+        .sidebar-links > li { padding: 12px 20px; cursor: pointer; transition: 0.3s; border-left: 4px solid transparent; color: #a0a0b5; }
+        .sidebar-links > li:hover, .sidebar-links > li.active { background: #2f2f45; border-left-color: #e9c46a; color: #fff; }
+        .sidebar-links i { margin-right: 10px; width: 20px; text-align: center; }
         
+        /* Dropdown/Sub-menu */
+        .sub-menu { display: none; background: #151525; padding-left: 40px; list-style: none; }
+        .sub-menu li { padding: 10px 0; font-size: 0.9rem; cursor: pointer; color: #888; transition: 0.2s; }
+        .sub-menu li:hover, .sub-menu li.active { color: #e9c46a; }
+        .has-dropdown.open .sub-menu { display: block; }
+        .has-dropdown .fa-chevron-down { float: right; margin-top: 5px; transition: 0.3s; }
+        .has-dropdown.open .fa-chevron-down { transform: rotate(180deg); }
+
+        /* Main Content */
+        .admin-main { flex: 1; padding: 30px; overflow-y: auto; }
+        .admin-card { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .hidden { display: none !important; }
         
-        /* লগইন বক্সের স্টাইল */
-        #login-section { height: 100vh; display: flex; justify-content: center; align-items: center; background: var(--primary-green); width: 100%; position: fixed; z-index: 2000; top: 0; left: 0;}
+        #login-section { height: 100vh; display: flex; justify-content: center; align-items: center; background: #1B4332; width: 100%; position: fixed; z-index: 2000; top: 0; left: 0;}
     </style>
 </head>
 <body>
 
-    <!-- ১. লগইন সেকশন -->
+    <!-- Login Section -->
     <div id="login-section">
         <div class="form-container" style="max-width: 350px; text-align: center;">
-            <h2>Admin Login</h2>
-            <br>
-            <input type="password" id="admin-pass" placeholder="Password" style="width:100%; padding:12px; margin-bottom:10px;">
-            <button id="login-btn" class="btn" style="width:100%;">Enter Dashboard</button>
-            <p id="error-msg" style="color:red; display:none; margin-top:10px;">Wrong Password!</p>
+            <h2>Admin OS Login</h2><br>
+            <input type="password" id="admin-pass" placeholder="Master Password" style="width:100%; padding:12px; margin-bottom:10px;">
+            <button id="login-btn" class="btn" style="width:100%;">Access System</button>
+            <p id="error-msg" style="color:red; display:none; margin-top:10px;">Access Denied!</p>
         </div>
     </div>
 
-    <!-- ২. মেইন অ্যাডমিন লেআউট -->
-    <div class="admin-wrapper">
-        <!-- সাইডবার -->
+    <!-- Admin OS Layout -->
+    <div class="admin-wrapper hidden" id="admin-dashboard-wrapper">
+        <!-- Sidebar -->
         <aside>
-            <h2>Admin Panel</h2>
+            <div class="admin-logo"><h2>Tarbiyah OS</h2></div>
             <ul class="sidebar-links">
-                <li id="tab-admissions" class="active">Admissions</li>
-                <li id="tab-users">Student Management</li>
-                <li id="tab-manage-courses">Courses (Public)</li>
-                <li id="tab-add-video">Lessons (Internal)</li>
-                <li id="tab-manage-blogs">Blog Articles</li>
-                <li id="tab-manage-teachers">Teachers Management</li>
-                <li id="tab-settings">Site Settings</li>                
-                <li onclick="location.reload()" style="color: red; margin-top: 50px;">Logout</li>
+                <li id="tab-dashboard" class="active"><i class="fas fa-chart-pie"></i> Analytics Dashboard</li>
+                
+                <li id="tab-admissions"><i class="fas fa-user-plus"></i> Admissions</li>
+                <li id="tab-users"><i class="fas fa-users"></i> Student DB</li>
+                
+                <li class="has-dropdown" onclick="toggleDropdown(this)">
+                    <i class="fas fa-graduation-cap"></i> LMS Settings <i class="fas fa-chevron-down"></i>
+                    <ul class="sub-menu">
+                        <li id="tab-manage-courses">Create Course</li>
+                        <li id="tab-add-video">Manage Videos</li>
+                        <li id="tab-manage-teachers">Faculty List</li>
+                    </ul>
+                </li>
+
+                <!-- Publications Dropdown (আপনার আইডিয়া অনুযায়ী) -->
+                <li class="has-dropdown" onclick="toggleDropdown(this)">
+                    <i class="fas fa-book-open"></i> Publications <i class="fas fa-chevron-down"></i>
+                    <ul class="sub-menu">
+                        <li id="tab-manage-blogs">Blog Articles</li>
+                        <li id="tab-manage-books">PDF Books (Store)</li>
+                        <li id="tab-manage-research">Research Papers</li>
+                    </ul>
+                </li>
+
+                <li id="tab-theme-settings"><i class="fas fa-paint-roller"></i> Theme & Logo</li>
+                <li onclick="location.reload()" style="color: #ff4757; margin-top: 30px;"><i class="fas fa-sign-out-alt"></i> Logout</li>
             </ul>
         </aside>
 
-        <!-- কন্টেন্ট এরিয়া -->
+        <!-- Main Workspace -->
         <main class="admin-main">
-            
+            <!-- Theme Settings View (নতুন ফিচার) -->
+            <div id="theme-settings-view" class="admin-card hidden">
+                <h3><i class="fas fa-paint-roller"></i> Website Theming & Branding</h3>
+                <p style="margin-bottom: 20px; color: #666;">Change colors, fonts, and logos across the entire website instantly.</p>
+                <form id="theme-settings-form" class="grid">
+                    <div class="form-group">
+                        <label>Website Name</label>
+                        <input type="text" id="s-name" placeholder="Tarbiyah Academy">
+                    </div>
+                    <div class="form-group">
+                        <label>Logo Image URL (Leave blank for text only)</label>
+                        <input type="text" id="s-logo-img" placeholder="https://link-to-your-logo.png">
+                    </div>
+                    <div class="form-group">
+                        <label>Primary Theme Color (Hex)</label>
+                        <input type="color" id="s-primary-color" value="#1B4332" style="height: 45px; padding: 2px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Accent Color (Gold)</label>
+                        <input type="color" id="s-accent-color" value="#D4AF37" style="height: 45px; padding: 2px;">
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Google Font URL</label>
+                        <input type="text" id="s-font-url" placeholder="e.g. https://fonts.googleapis.com/css2?family=Roboto...">
+                    </div>
+                    <button type="submit" class="btn" style="grid-column: span 2;">Deploy New Theme</button>
+                </form>
+            </div>
+
+            <!-- Dashboard Analytics View (খালি রাখা হলো, ধাপ ৫ এ Chart.js বসবে) -->
+            <div id="dashboard-view" class="admin-card">
+                <h3>System Analytics</h3>
+                <p>Charts and Funnel Data will load here.</p>
+                <!-- গুগল অ্যানালিটিক্স এবং চার্টস এখানে আসবে -->
+            </div>
+
+            <!-- আপনার আগের সব ভিউ (Admissions, Users, Courses, Blogs) এখানে থাকবে -->
             <!-- Admissions View -->
             <div id="admissions-view" class="admin-card">
                 <h3>New Admission Requests</h3>
@@ -91,7 +152,7 @@
                     <input type="text" id="c-tag" placeholder="Tag (e.g. Arabic)" required>
                     <input type="text" id="c-img" placeholder="Image URL" required>
                     <input type="text" id="c-price" placeholder="Price" required>
-                    <textarea id="c-desc" placeholder="Short Description" style="grid-column: span 2;"></textarea>
+                    <textarea id="c-desc" placeholder="Short Description" style="grid"></textarea>
                     <button type="submit" class="btn">Publish Course</button>
                 </form>
             </div>
@@ -117,12 +178,26 @@
                 <h3>Post a New Blog</h3>
                 <form id="blog-upload-form">
                     <input type="hidden" id="edit-blog-id">
-                    <div class="form-group"><label>Title</label><input type="text" id="b-title" required></div>
-                    <div class="form-group"><label>Cover Image URL</label><input type="text" id="b-img" required></div>
-                    <div class="form-group"><label>Content (Full Article)</label><textarea id="b-content" rows="10" required></textarea></div>
+                    <div class="form-group"><label>Title</label>
+                    <input type="text" id="b-title" required>
+                </div>
+                    <div class="form-group">
+                        <label>Cover Image URL</label>
+                    <input type="text" id="b-img" required>
+                </div>
+                    <div class="form-group">
+                        <label>Content (Full Article)</label>
+                        <textarea id="b-content" rows="10" required></textarea>
+                    </div>
                     <button type="submit" class="btn">Publish Blog Article</button>
                 </form>
-            </div>
+                <h4>Existing Blog Articles</h4>
+                 <table>
+                   <thead><tr><th>Title</th><th>Image</th><th>Action</th></tr></thead>
+                      <tbody id="blogs-table-body"></tbody>
+                   </table>
+                 </div>
+            
 
             <!-- Teachers Management -->
             <div id="manage-teachers-view" class="admin-card hidden">
@@ -135,48 +210,23 @@
         <textarea id="t-bio" placeholder="Short Biography" style="grid-column: span 2;"></textarea>
         <button type="submit" id="teacher-sub-btn" class="btn">Add Teacher</button>
     </form>
-    <div class="table-wrapper">
+    
         <h4>Existing Teachers</h4>
         <table>
             <thead><tr><th>Name</th><th>Subject</th><th>Action</th></tr></thead>
             <tbody id="teachers-table-body"></tbody>
         </table>
     </div>
-    </div>
-
-            <!-- Site Settings View -->
-            <div id="settings-view" class="admin-card hidden">
-                <h3>Global Website Settings</h3>
-                <form id="settings-form">
-                    <div class="form-group"><label>Website Logo Text</label><input type="text" id="s-name" placeholder="Tarbiyah"></div>
-                    <div class="form-group"><label>Announcement (Header Bar)</label><input type="text" id="s-announcement" placeholder="Admission Open!"></div>
-                    <button type="submit" class="btn">Update All Pages</button>
-                </form>
-            </div>
 
         </main>
     </div>
 
-    <!-- পপআপ মোডাল (কোর্স অ্যাসাইন করার জন্য) -->
-    <div id="course-modal" class="hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:30px; border:2px solid gold; border-radius:10px; z-index:3000;">
-        <h4>Give Access to Student</h4>
-        <select id="select-course" style="width:100%; padding:10px; margin:10px 0;">
-            <option value="Arabic">Arabic</option>
-            <option value="Dawah">Dawah</option>
-            <option value="Psychology">Psychology</option>
-        </select>
-        <button id="confirm-assign" class="btn">Confirm Access</button>
-        <button onclick="document.getElementById('course-modal').classList.add('hidden')" class="btn" style="background:red; border:none;">Close</button>
-    </div>
-
-    <div class="table-wrapper">
-    <h4>Existing Blog Articles</h4>
-    <table>
-        <thead><tr><th>Title</th><th>Image</th><th>Action</th></tr></thead>
-        <tbody id="blogs-table-body"></tbody>
-    </table>
-</div>
-
+    <!-- ড্রপডাউন কাজ করানোর ছোট্ট স্ক্রিপ্ট -->
+    <script>
+        function toggleDropdown(element) {
+            element.classList.toggle('open');
+        }
+    </script>
     <script type="module" src="script.js"></script>
     <script type="module" src="admin.js"></script>
 </body>
