@@ -157,3 +157,55 @@ async function loadSettings() {
     }
 }
 loadSettings();
+
+// script.js এর একদম নিচে যোগ করুন (Dynamic Theming Engine)
+import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+function applyDynamicTheme() {
+    onSnapshot(doc(db, "Settings", "theme"), (docSnap) => {
+        if (docSnap.exists()) {
+            const theme = docSnap.data();
+
+            // ১. কালার পরিবর্তন (CSS Variables আপডেট করা)
+            if(theme.primaryColor) document.documentElement.style.setProperty('--primary-green', theme.primaryColor);
+            if(theme.accentColor) document.documentElement.style.setProperty('--soft-gold', theme.accentColor);
+
+            // ২. লোগো পরিবর্তন (ছবি নাকি টেক্সট)
+            const logoContainers = document.querySelectorAll('.logo a, .logo');
+            logoContainers.forEach(container => {
+                if (theme.logoImg) {
+                    // যদি ছবির লিঙ্ক থাকে, ছবি দেখাবে
+                    container.innerHTML = `<img src="${theme.logoImg}" alt="${theme.siteName}" style="max-height: 50px;">`;
+                } else {
+                    // ছবি না থাকলে টেক্সট দেখাবে
+                    container.innerHTML = `<h1>${theme.siteName}</h1>`;
+                }
+            });
+
+            // ৩. ওয়েবসাইটের টাইটেল পরিবর্তন
+            if(theme.siteName) document.title = theme.siteName + " | Education Platform";
+
+            // ৪. কাস্টম গুগল ফন্ট যুক্ত করা
+            if (theme.fontUrl) {
+                let fontLink = document.getElementById('dynamic-font');
+                if (!fontLink) {
+                    fontLink = document.createElement('link');
+                    fontLink.id = 'dynamic-font';
+                    fontLink.rel = 'stylesheet';
+                    document.head.appendChild(fontLink);
+                }
+                fontLink.href = theme.fontUrl;
+                
+                // ফন্টের নাম বের করে বডিতে বসানো (সাধারণ লজিক)
+                const fontNameMatch = theme.fontUrl.match(/family=([^&:]+)/);
+                if(fontNameMatch) {
+                    const fontName = fontNameMatch[1].replace(/\+/g, ' ');
+                    document.body.style.fontFamily = `'${fontName}', sans-serif`;
+                }
+            }
+        }
+    });
+}
+
+// থিম ফাংশন চালু করা
+applyDynamicTheme();
