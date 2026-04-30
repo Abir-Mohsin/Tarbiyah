@@ -8,6 +8,69 @@ import {
     getFirestore, collection, getDocs, addDoc, updateDoc, setDoc, doc, deleteDoc, getDoc, arrayUnion, query, orderBy 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// admin.js এর উপরের দিকে এই কোডটি দিয়ে Quill চালু করুন
+const quill = new Quill('#quill-editor', {
+    theme: 'snow',
+    modules: {
+        toolbar: [
+            [{ 'header': [1, 2, 3, false] }],['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],[{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            ['link', 'image', 'video'],
+            ['clean'] // ফরম্যাট রিমুভ করার জন্য
+        ]
+    },
+    placeholder: 'Write your beautiful article here...'
+});
+
+// ব্লগ সেভ লজিক আপডেট (quill.root.innerHTML ব্যবহার করতে হবে)
+const bForm = document.getElementById('blog-upload-form');
+bForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const editId = document.getElementById('edit-blog-id').value;
+    
+    // এডিটর থেকে HTML কোড টেনে আনা
+    const richContent = quill.root.innerHTML;
+
+    if (richContent === "<p><br></p>") {
+        alert("Content cannot be empty!");
+        return;
+    }
+
+    const data = { 
+        title: document.getElementById('b-title').value, 
+        image: document.getElementById('b-img').value, 
+        content: richContent, // আগে b-content ছিল, এখন richContent
+        createdAt: new Date() 
+    };
+
+    try {
+        if (editId) await updateDoc(doc(db, "Blogs", editId), data);
+        else await addDoc(collection(db, "Blogs"), data);
+        
+        alert("Blog Article Saved!"); 
+        bForm.reset(); 
+        quill.root.innerHTML = ""; // এডিটর খালি করা
+        document.getElementById('edit-blog-id').value = ""; 
+        loadBlogs();
+    } catch (error) {
+        alert("Error saving blog!");
+    }
+});
+
+// ব্লগ এডিট ফাংশন আপডেট (Editor-এ ডাটা বসানো)
+window.editBlog = async (id) => {
+    const snap = await getDoc(doc(db, "Blogs", id));
+    const b = snap.data();
+    document.getElementById('b-title').value = b.title;
+    document.getElementById('b-img').value = b.image;
+    
+    // Editor এর ভেতরে ডাটা বসানো
+    quill.root.innerHTML = b.content; 
+    
+    document.getElementById('edit-blog-id').value = id;
+    window.scrollTo(0,0);
+};
+
 // ১. ফায়ারবেস কনফিগারেশন
 const firebaseConfig = {
     apiKey: "AIzaSyByrLkl4953IvCNyVD7jXWUAvj-9AWfD10", 

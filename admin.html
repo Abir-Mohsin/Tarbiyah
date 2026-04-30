@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tarbiyah | Master Admin OS</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <!-- FontAwesome for Icons (মেনুতে আইকন দেখানোর জন্য) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -185,10 +186,11 @@
                         <label>Cover Image URL</label>
                     <input type="text" id="b-img" required>
                 </div>
-                    <div class="form-group">
-                        <label>Content (Full Article)</label>
-                        <textarea id="b-content" rows="10" required></textarea>
-                    </div>
+                    <div class="form-group" style="margin-bottom: 60px;">
+                     <label>Content (Full Article)</label>
+                 <!-- Textarea-এর বদলে Quill এর div -->
+                     <div id="quill-editor" style="height: 300px; background: white; color: black; border-radius: 0 0 5px 5px;"></div>
+                </div>
                     <button type="submit" class="btn">Publish Blog Article</button>
                 </form>
                 <h4>Existing Blog Articles</h4>
@@ -227,6 +229,7 @@
             element.classList.toggle('open');
         }
     </script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script type="module" src="script.js"></script>
     <script type="module" src="admin.js"></script>
 </body>
