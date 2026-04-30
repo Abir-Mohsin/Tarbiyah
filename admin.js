@@ -149,20 +149,6 @@ courseForm?.addEventListener('submit', async (e) => {
     courseForm.reset();
 });
 
-// ব্লগ আর্টিকেল পাবলিশ
-const blogForm = document.getElementById('blog-upload-form');
-blogForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    await addDoc(collection(db, "Blogs"), {
-        title: document.getElementById('b-title').value,
-        image: document.getElementById('b-img').value,
-        content: document.getElementById('b-content').value,
-        createdAt: new Date()
-    });
-    alert("Blog Published!");
-    blogForm.reset();
-});
-
 // সেটিংস আপডেট
 const settingsForm = document.getElementById('settings-form');
 settingsForm?.addEventListener('submit', async (e) => {
