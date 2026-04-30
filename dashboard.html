@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | Tarbiyah</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ড্যাশবোর্ডের বিশেষ স্টাইল */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--soft-gold);
+            margin-bottom: 20px;
+        }
+
+        .learning-area { display: none; } /* শুরুতে এটি লুকানো থাকবে */
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 20px;
+        }
+
+        .video-player { width: 100%; height: 450px; border-radius: 10px; background: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        
+        .playlist { background: var(--card-bg); padding: 20px; border-radius: 10px; height: 450px; overflow-y: auto; border: 1px solid #ddd; }
+        .playlist-item {
+            padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.3s; font-size: 0.9rem;
+        }
+        .playlist-item:hover, .playlist-item.active { background: var(--primary-green); color: white; border-radius: 5px; }
+        
+        .progress-container { margin: 15px 0; background: #eee; border-radius: 20px; height: 25px; width: 100%; overflow: hidden; position: relative; }
+        .progress-bar { background: var(--soft-gold); height: 100%; width: 0%; transition: width 0.5s; text-align: center; color: black; font-size: 13px; font-weight: bold; line-height: 25px; }
+        
+        .comment-section { background: var(--card-bg); padding: 20px; border-radius: 10px; margin-top: 20px; border: 1px solid #ddd; }
+        .comment-box { width: 100%; padding: 12px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #ccc; }
+        .comment-item { padding: 15px; border-bottom: 1px solid #eee; margin-bottom: 10px; background: #fafafa; border-radius: 5px; }
+
+        #logout-btn { background: #d00; border: none; font-size: 0.8rem; padding: 5px 15px; }
+
+        /* মোবাইল ভিউ */
+        @media(max-width: 768px) {
+            .dashboard-container { grid-template-columns: 1fr; }
+            .video-player { height: 220px; }
+            .playlist { height: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <a href="index.html"><h1>Tarbiyah</h1></a>
+                </div>
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="courses.html">Courses</a></li>
+                    <li><a href="admission.html">Admission</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="controls">
+                    <button id="dark-mode-toggle">🌙</button>
+                    <div class="hamburger" id="hamburger">☰</div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- ১. স্বাগতম সেকশন এবং লগআউট -->
+        <div class="dashboard-header">
+            <div>
+                <h2>Assalamu Alaikum, <span id="student-name">Student</span></h2>
+                <p>Welcome to your learning portal.</p>
+            </div>
+            <button id="logout-btn" class="btn">Logout</button>
+        </div>
+
+        <!-- ২. কোর্স সিলেকশন এরিয়া (লগইন করার পর এখানে সব কেনা কোর্স দেখাবে) -->
+        <div id="course-selection">
+            <h3 style="margin-bottom: 20px;">My Enrolled Courses:</h3>
+            <div id="enrolled-courses-list" class="grid">
+                <!-- এখানে কেনা কোর্সের কার্ডগুলো অটোমেটিক আসবে -->
+                <p>Loading your courses...</p>
+            </div>
+        </div>
+
+        <!-- ৩. লার্নিং এরিয়া (ভিডিও প্লেয়ার - শুরুতে লুকানো থাকে) -->
+        <div id="learning-area" class="learning-area">
+            <div style="margin-bottom: 15px;">
+                <button onclick="location.reload()" class="btn" style="background: #666; border: none; padding: 5px 15px;">&larr; Back to Course List</button>
+                <h2 style="display: inline; margin-left: 15px;">Course: <span id="course-title">...</span></h2>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar">0% Progress</div>
+            </div>
+
+            <div class="dashboard-container">
+                <!-- Left Side: Video & Comments -->
+                <div>
+                    <iframe id="video-frame" class="video-player" src="" frameborder="0" allowfullscreen></iframe>
+                    
+                    <div style="margin-top: 15px;">
+                        <button id="mark-complete-btn" class="btn">✔ Mark as Completed</button>
+                    </div>
+
+                    <!-- Comment Section -->
+                    <div class="comment-section">
+                        <h3>Discussion / Questions</h3>
+                        <textarea id="comment-input" class="comment-box" rows="3" placeholder="Ask a question about this lesson..."></textarea>
+                        <button id="post-comment-btn" class="btn">Post Question</button>
+                        
+                        <div id="comments-list" class="comment-list">
+                            <!-- Comments will load here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Playlist -->
+                <div class="playlist">
+                    <h4 style="margin-bottom: 10px;">Course Lessons</h4>
+                    <div id="video-list">
+                        <!-- Playlist items will load here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+    <!-- স্ক্রিপ্টগুলো মডিউল হিসেবে অ্যাড করা হয়েছে -->
+    <script type="module" src="script.js"></script>
+    <script type="module" src="dashboard.js"></script>
+</body>
+</html>

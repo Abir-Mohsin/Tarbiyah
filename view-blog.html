@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Read Article | Tarbiyah</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .full-blog-content { max-width: 800px; margin: 40px auto; background: var(--card-bg); padding: 40px; border-radius: 10px; }
+        .full-blog-content img { width: 100%; border-radius: 10px; margin-bottom: 20px; }
+        .full-blog-content p { white-space: pre-wrap; font-size: 1.1rem; line-height: 1.8; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container"><nav><div class="logo"><a href="index.html"><h1>Tarbiyah</h1></a></div></nav></div>
+    </header>
+
+    <main class="container">
+        <div id="blog-details" class="full-blog-content">
+            <p>Loading article...</p>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyByrLkl4953IvCNyVD7jXWUAvj-9AWfD10", authDomain: "tarbiyah-a27d3.firebaseapp.com", projectId: "tarbiyah-a27d3", storageBucket: "tarbiyah-a27d3.firebasestorage.app", messagingSenderId: "1072439212695", appId: "1:1072439212695:web:acdfa80a7a6b88f14c87d2" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function fetchFullBlog() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const blogId = urlParams.get('id');
+
+            if (blogId) {
+                const docSnap = await getDoc(doc(db, "Blogs", blogId));
+                if (docSnap.exists()) {
+                    const blog = docSnap.data();
+                    document.getElementById('blog-details').innerHTML = `
+                        <h1>${blog.title}</h1>
+                        <br>
+                        <img src="${blog.image}" alt="">
+                        <p>${blog.content}</p>
+                        <br>
+                        <a href="blog.html" class="btn">Back to Blogs</a>
+                    `;
+                    document.title = blog.title + " | Tarbiyah Blog";
+                }
+            }
+        }
+        window.onload = fetchFullBlog;
+    </script>
+</body>
+</html>

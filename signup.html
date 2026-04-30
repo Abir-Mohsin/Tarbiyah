@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | Tarbiyah</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="wrapper">
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo"><a href="index.html"><h1>Tarbiyah</h1></a></div>
+                <div class="controls"><button id="dark-mode-toggle">🌙</button></div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container section">
+        <div class="form-container">
+            <h2 style="text-align: center;">Create Student Account</h2>
+            <p style="text-align: center; font-size: 0.9rem; color: #666; margin-bottom: 20px;">Fill this after sending payment to get dashboard access.</p>
+            
+            <form id="signup-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signup-name" required placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signup-email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signup-pass" required placeholder="Min 6 characters">
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Create Account</button>
+            </form>
+            
+            <br>
+            <p style="text-align: center; font-size: 0.9rem;">
+                Already have an account? <a href="login.html" style="color: var(--soft-gold); font-weight: bold;">Login here</a>
+            </p>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container" style="text-align: center;">
+            <p>&copy; 2023 Tarbiyah Institute. All rights reserved.</p>
+        </div>
+    </footer>
+</div>
+    <script type="module" src="script.js"></script>
+    <script type="module" src="signup.js"></script>
+</body>
+</html>

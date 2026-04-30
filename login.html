@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Tarbiyah</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="wrapper">
+    <header>
+    <div class="container">
+        <nav>
+            <div class="logo">
+                <a href="index.html"><h1>Tarbiyah</h1></a>
+            </div>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="courses.html">Courses</a></li>
+                <li><a href="teachers.html">Teachers</a></li>
+                <li><a href="admission.html">Admission</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li>
+                    <!-- এটি অত্যন্ত গুরুত্বপূর্ণ: এই ID টি দিয়ে script.js লগইন চেক করে -->
+                    <a href="login.html" id="nav-auth-btn" class="btn" style="padding: 6px 18px; margin-left: 10px; border: 2px solid var(--soft-gold); background: goldenrod; color: var(--soft-gold);">
+                        Student Login
+                    </a>
+                </li>
+            </ul>
+            <div class="controls">
+                <button id="dark-mode-toggle">🌙</button>
+                <div class="hamburger" id="hamburger">☰</div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+    <main class="container section">
+        <div class="form-container">
+            <h2 style="text-align: center;">Student Login</h2>
+            <p style="text-align:center; font-size: 0.9rem; margin-bottom: 20px;">Access your lessons and dashboard.</p>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-pass" required placeholder="Enter password">
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Login</button>
+            </form>
+            
+            <br>
+            <p style="text-align: center; font-size: 0.9rem;">
+                New student? <a href="signup.html" style="color: var(--soft-gold); font-weight: bold;">Sign Up here</a>
+            </p>
+            <p style="text-align: center; margin-top: 10px; font-size: 0.8rem;">
+                Not paid yet? <a href="admission.html">Submit Admission Form</a>
+            </p>
+        </div>
+    </main>
+
+    <footer>
+    <div class="container">
+        <div class="footer-content">
+            <div>
+                <h3>Tarbiyah</h3>
+                <p>Empowering the Ummah with sacred knowledge and modern excellence.</p>
+            </div>
+            <div>
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="admission.html">Admissions</a></li>
+                    <li><a href="courses.html">Our Courses</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 Tarbiyah Institute. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+</div>
+    <script type="module" src="script.js"></script>
+    <script type="module" src="login.js"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarbiyah | Professional Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* অ্যাডমিন লেআউটের বিশেষ স্টাইল */
+        .admin-wrapper { display: flex; min-height: 100vh; }
+        
+        /* সাইডবার ডিজাইন */
+        aside {
+            width: 250px; background: var(--footer-bg); color: white;
+            padding: 20px; position: sticky; top: 0; height: 100vh;
+        }
+        aside h2 { color: var(--soft-gold); margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .sidebar-links li { margin-bottom: 15px; cursor: pointer; padding: 10px; border-radius: 5px; transition: 0.3s; }
+        .sidebar-links li:hover, .sidebar-links li.active { background: var(--primary-green); color: var(--soft-gold); }
+        
+        /* মেইন কন্টেন্ট এরিয়া */
+        .admin-main { flex: 1; padding: 30px; background: var(--bg-light); overflow-y: auto; }
+        .admin-card { background: var(--card-bg); padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        .hidden { display: none !important; }
+        
+        /* লগইন বক্সের স্টাইল */
+        #login-section { height: 100vh; display: flex; justify-content: center; align-items: center; background: var(--primary-green); width: 100%; position: fixed; z-index: 2000; top: 0; left: 0;}
+    </style>
+</head>
+<body>
+
+    <!-- ১. লগইন সেকশন -->
+    <div id="login-section">
+        <div class="form-container" style="max-width: 350px; text-align: center;">
+            <h2>Admin Login</h2>
+            <br>
+            <input type="password" id="admin-pass" placeholder="Password" style="width:100%; padding:12px; margin-bottom:10px;">
+            <button id="login-btn" class="btn" style="width:100%;">Enter Dashboard</button>
+            <p id="error-msg" style="color:red; display:none; margin-top:10px;">Wrong Password!</p>
+        </div>
+    </div>
+
+    <!-- ২. মেইন অ্যাডমিন লেআউট -->
+    <div class="admin-wrapper">
+        <!-- সাইডবার -->
+        <aside>
+            <h2>Admin Panel</h2>
+            <ul class="sidebar-links">
+                <li id="tab-admissions" class="active">Admissions</li>
+                <li id="tab-users">Student Management</li>
+                <li id="tab-manage-courses">Courses (Public)</li>
+                <li id="tab-add-video">Lessons (Internal)</li>
+                <li id="tab-manage-blogs">Blog Articles</li>
+                <li id="tab-settings">Site Settings</li>
+                <li onclick="location.reload()" style="color: red; margin-top: 50px;">Logout</li>
+            </ul>
+        </aside>
+
+        <!-- কন্টেন্ট এরিয়া -->
+        <main class="admin-main">
+            
+            <!-- Admissions View -->
+            <div id="admissions-view" class="admin-card">
+                <h3>New Admission Requests</h3>
+                <div class="table-wrapper">
+                    <table id="admissions-table">
+                        <thead><tr><th>Name</th><th>Email</th><th>Course</th><th>TrxID</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Student Management View -->
+            <div id="users-view" class="admin-card hidden">
+                <h3>Registered Students</h3>
+                <div class="table-wrapper">
+                    <table id="users-table">
+                        <thead><tr><th>Name</th><th>Email</th><th>Courses</th><th>Action</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Course Creation View -->
+            <div id="manage-courses-view" class="admin-card hidden">
+                <h3>Publish New Course Card</h3>
+                <form id="course-create-form" class="grid">
+                    <input type="text" id="c-title" placeholder="Course Title" required>
+                    <input type="text" id="c-tag" placeholder="Tag (e.g. Arabic)" required>
+                    <input type="text" id="c-img" placeholder="Image URL" required>
+                    <input type="text" id="c-price" placeholder="Price" required>
+                    <textarea id="c-desc" placeholder="Short Description" style="grid-column: span 2;"></textarea>
+                    <button type="submit" class="btn">Publish Course</button>
+                </form>
+            </div>
+
+            <!-- Video/Lesson Management -->
+            <div id="add-video-view" class="admin-card hidden">
+                <h3>Upload New Lesson</h3>
+                <form id="video-upload-form" class="grid">
+                    <input type="text" id="v-title" placeholder="Lesson Title" required>
+                    <input type="text" id="v-url" placeholder="YouTube Video ID" required>
+                    <select id="v-course" required>
+                        <option value="Arabic">Arabic</option>
+                        <option value="Dawah">Dawah</option>
+                        <option value="Psychology">Psychology</option>
+                    </select>
+                    <input type="number" id="v-order" placeholder="Serial Order" required>
+                    <button type="submit" class="btn">Add Lesson</button>
+                </form>
+            </div>
+
+            <!-- Blog Article View -->
+            <div id="manage-blogs-view" class="admin-card hidden">
+                <h3>Post a New Blog</h3>
+                <form id="blog-upload-form">
+                    <div class="form-group"><label>Title</label><input type="text" id="b-title" required></div>
+                    <div class="form-group"><label>Cover Image URL</label><input type="text" id="b-img" required></div>
+                    <div class="form-group"><label>Content (Full Article)</label><textarea id="b-content" rows="10" required></textarea></div>
+                    <button type="submit" class="btn">Publish Blog Article</button>
+                </form>
+            </div>
+
+            <!-- Site Settings View -->
+            <div id="settings-view" class="admin-card hidden">
+                <h3>Global Website Settings</h3>
+                <form id="settings-form">
+                    <div class="form-group"><label>Website Logo Text</label><input type="text" id="s-name" placeholder="Tarbiyah"></div>
+                    <div class="form-group"><label>Announcement (Header Bar)</label><input type="text" id="s-announcement" placeholder="Admission Open!"></div>
+                    <button type="submit" class="btn">Update All Pages</button>
+                </form>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- পপআপ মোডাল (কোর্স অ্যাসাইন করার জন্য) -->
+    <div id="course-modal" class="hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:30px; border:2px solid gold; border-radius:10px; z-index:3000;">
+        <h4>Give Access to Student</h4>
+        <select id="select-course" style="width:100%; padding:10px; margin:10px 0;">
+            <option value="Arabic">Arabic</option>
+            <option value="Dawah">Dawah</option>
+            <option value="Psychology">Psychology</option>
+        </select>
+        <button id="confirm-assign" class="btn">Confirm Access</button>
+        <button onclick="document.getElementById('course-modal').classList.add('hidden')" class="btn" style="background:red; border:none;">Close</button>
+    </div>
+
+    <div class="table-wrapper">
+    <h4>Existing Blog Articles</h4>
+    <table>
+        <thead><tr><th>Title</th><th>Image</th><th>Action</th></tr></thead>
+        <tbody id="blogs-table-body"></tbody>
+    </table>
+</div>
+
+    <script type="module" src="script.js"></script>
+    <script type="module" src="admin.js"></script>
+</body>
+</html>

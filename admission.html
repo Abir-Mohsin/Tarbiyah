@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarbiyah | Admission</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="wrapper">
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <a href="index.html"><h1>Tarbiyah</h1></a>
+                </div>
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="courses.html">Courses</a></li>
+                    <li><a href="teachers.html">Teachers</a></li>
+                    <li><a href="admission.html">Admission</a></li>
+                    <li><a href="blog.html">Blog</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li>
+    <a href="login.html" id="nav-auth-btn" class="btn" style="padding: 6px 18px; margin-left: 10px;">
+                            Student Login
+                        </a>
+</li>
+                </ul>
+                <div class="controls">
+                    <button id="dark-mode-toggle">🌙</button>
+                    <div class="hamburger" id="hamburger">☰</div>
+                </div>
+            </nav>
+        </div>
+    </header>
+    <main class="container section">
+        <h2 class="section-title">Apply for Admission</h2>
+        <div class="form-container">
+            <form id="admission-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="name" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="phone" required placeholder="Enter your phone number">
+                </div>
+                <div class="form-group">
+                    <label>Select Course</label>
+                    <select id="course" required>
+                        <option value="">-- Choose a Course --</option>
+                        <option value="arabic">Classical Arabic</option>
+                        <option value="english">Professional English</option>
+                        <option value="psychology">Islamic Psychology</option>
+                        <option value="dawah">Contemporary Dawah</option>
+                    </select>
+                </div>
+                <!-- Payment Instructions -->
+<div style="background-color: var(--bg-light); padding: 15px; border-left: 4px solid var(--primary-green); margin-bottom: 20px; border-radius: 5px;">
+    <p style="margin-bottom: 5px;"><strong>Payment Instructions:</strong></p>
+    <p style="font-size: 0.9rem;">Please send the course fee to our <strong>bKash / Nagad (Personal)</strong> number: <span style="color: red; font-weight: bold;">01788-876 206</span>.</p>
+</div>
+
+<!-- Transaction ID Input -->
+<div class="form-group">
+    <label>Transaction ID (TrxID)</label>
+    <input type="text" id="trxId" required placeholder="Enter bKash/Nagad TrxID">
+</div>
+                <div class="form-group">
+                    <label>Why do you want to join?</label>
+                    <textarea rows="4" required placeholder="Briefly explain your motivation..."></textarea>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Submit Application</button>
+            </form>
+        </div>
+    </main>
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <h3>Tarbiyah</h3>
+                    <p>Empowering the Ummah with sacred knowledge and modern excellence.</p>
+                </div>
+                <div>
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="admission.html">Admissions</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 Tarbiyah Institute. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

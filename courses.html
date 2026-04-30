@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarbiyah | Courses</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="wrapper">
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <a href="index.html"><h1>Tarbiyah</h1></a>
+                </div>
+                <!-- মেনুবার -->
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="courses.html">Courses</a></li>
+                    <li><a href="teachers.html">Teachers</a></li>
+                    <li><a href="admission.html">Admission</a></li>
+                    <li><a href="blog.html">Blog</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <!-- স্মার্ট অথেনটিকেশন বাটন (script.js দ্বারা নিয়ন্ত্রিত) -->
+                    <li>
+                        <a href="login.html" id="nav-auth-btn" class="btn" style="padding: 6px 18px; margin-left: 10px;">
+                            Student Login
+                        </a>
+                    </li>
+                </ul>
+                <div class="controls">
+                    <button id="dark-mode-toggle">🌙</button>
+                    <div class="hamburger" id="hamburger">☰</div>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="container section">
+        <h2 class="section-title">Academic Programs</h2>
+        <p style="text-align: center; margin-bottom: 30px;">Explore our world-class Islamic and modern courses.</p>
+        
+        <!-- ডাইনামিক কোর্স লিস্ট (courses.js এখানে ডাটা লোড করবে) -->
+        <div id="dynamic-courses-list" class="grid">
+            <!-- এখানে ডাটাবেসের কোর্সগুলো অটোমেটিক শো করবে -->
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <h3>Tarbiyah</h3>
+                    <p>Empowering the Ummah with sacred knowledge and modern excellence.</p>
+                </div>
+                <div>
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="admission.html">Admissions</a></li>
+                        <li><a href="login.html">Student Login</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 Tarbiyah Institute. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</div>
+    <script type="module" src="script.js"></script>
+    <script type="module" src="courses.js"></script>
+</body>
+</html>
