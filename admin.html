@@ -36,6 +36,14 @@
         
         #login-section { height: 100vh; display: flex; justify-content: center; align-items: center; background: #1B4332; width: 100%; position: fixed; z-index: 2000; top: 0; left: 0;}
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-MSF27WNX');</script>
+<!-- End Google Tag Manager -->
 </head>
 <body>
 
@@ -116,13 +124,44 @@
                 </form>
             </div>
 
-            <!-- Dashboard Analytics View (খালি রাখা হলো, ধাপ ৫ এ Chart.js বসবে) -->
-            <div id="dashboard-view" class="admin-card">
-                <h3>System Analytics</h3>
-                <p>Charts and Funnel Data will load here.</p>
-                <!-- গুগল অ্যানালিটিক্স এবং চার্টস এখানে আসবে -->
-            </div>
+            <!-- Dashboard Analytics View -->
+<div id="dashboard-view" class="admin-card">
+    <h2 style="margin-bottom: 20px;"><i class="fas fa-tachometer-alt"></i> System Overview</h2>
+    
+    <!-- মেইন স্ট্যাটাস কার্ডস -->
+    <div class="dash-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+        <div class="stat-box" style="background: #fff; color: #333; border: 1px solid #eee;">
+            <p>Total Revenue</p>
+            <h3 id="total-revenue" style="color: #27ae60;">0 BDT</h3>
+        </div>
+        <div class="stat-box" style="background: #fff; color: #333; border: 1px solid #eee;">
+            <p>New Signups</p>
+            <h3 id="total-students" style="color: #2980b9;">0</h3>
+        </div>
+        <div class="stat-box" style="background: #fff; color: #333; border: 1px solid #eee;">
+            <p>Pending Admissions</p>
+            <h3 id="pending-count" style="color: #e67e22;">0</h3>
+        </div>
+    </div>
 
+    <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 20px;">
+        <!-- ইউজার গ্রোথ চার্ট -->
+        <div class="admin-card" style="margin: 0;">
+            <h4>User Registration Flow</h4>
+            <canvas id="userGrowthChart"></canvas>
+        </div>
+
+        <!-- মার্কেটিং ফানেল (Funnel) -->
+        <div class="admin-card" style="margin: 0;">
+            <h4>Conversion Funnel</h4>
+            <div id="funnel-container" style="margin-top: 20px;">
+                <div style="background: #34495e; color: white; padding: 10px; margin-bottom: 5px; border-radius: 5px; width: 100%;">Visitors (100%)</div>
+                <div style="background: #2980b9; color: white; padding: 10px; margin-bottom: 5px; border-radius: 5px; width: 80%;">Signups (<span id="signup-percent">0</span>%)</div>
+                <div style="background: #27ae60; color: white; padding: 10px; margin-bottom: 5px; border-radius: 5px; width: 40%;">Paid Students (<span id="paid-percent">0</span>%)</div>
+            </div>
+             </div>
+         </div>
+    </div>
             <!-- আপনার আগের সব ভিউ (Admissions, Users, Courses, Blogs) এখানে থাকবে -->
             <!-- Admissions View -->
             <div id="admissions-view" class="admin-card">
@@ -298,5 +337,9 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script type="module" src="script.js"></script>
     <script type="module" src="admin.js"></script>
+    <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MSF27WNX"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 </body>
 </html>

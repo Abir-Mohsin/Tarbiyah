@@ -370,3 +370,58 @@ quizForm?.addEventListener('submit', async (e) => {
         quizForm.reset();
     } catch (e) { alert("Error!"); }
 });
+
+// --- Analytics & Charts Logic ---
+
+// ১. ড্যাশবোর্ড ট্যাব ক্লিক করলে অ্যানালিটিক্স লোড হবে
+document.getElementById('tab-dashboard')?.addEventListener('click', () => {
+    showSection('dashboard-view');
+    initAnalytics();
+});
+
+async function initAnalytics() {
+    // ডাটাবেস থেকে তথ্য আনা
+    const userSnap = await getDocs(collection(db, "Users"));
+    const admissionSnap = await getDocs(collection(db, "Admissions"));
+    
+    // ১. রেভিনিউ ক্যালকুলেশন
+    let totalRevenue = 0;
+    admissionSnap.forEach(doc => {
+        // এখানে পেমেন্ট বা প্রাইস ফিল্ড থাকলে তা যোগ হবে
+        // আপাতত ডামি প্রাইস ৫০০ হিসেবে ধরছি যদি আপনার ডাটাবেসে প্রাইস না থাকে
+        totalRevenue += 500; 
+    });
+    document.getElementById('total-revenue').innerText = totalRevenue + " BDT";
+    document.getElementById('total-students').innerText = userSnap.size;
+    document.getElementById('pending-count').innerText = admissionSnap.size;
+
+    // ২. ফানেল ক্যালকুলেশন (Signup % এবং Conversion %)
+    // ধরে নিচ্ছি ৫০০ ভিজিটর এসেছে (গুগল অ্যানালিটিক্স থেকে আসল ডাটা পাবেন)
+    const totalVisitors = 500; 
+    const signupPercent = Math.round((userSnap.size / totalVisitors) * 100);
+    const paidPercent = Math.round((admissionSnap.size / userSnap.size) * 100);
+    
+    document.getElementById('signup-percent').innerText = signupPercent;
+    document.getElementById('paid-percent').innerText = paidPercent;
+
+    // ৩. Chart.js দিয়ে গ্রাফ তৈরি করা
+    const ctx = document.getElementById('userGrowthChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'], // মাস অনুযায়ী ডাইনামিক করা সম্ভব
+            datasets: [{
+                label: 'New Registrations',
+                data: [12, 19, 3, userSnap.size],
+                borderColor: '#1B4332',
+                tension: 0.4,
+                fill: true,
+                backgroundColor: 'rgba(27, 67, 50, 0.1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } }
+        }
+    });
+}
