@@ -45,9 +45,13 @@ if (signupForm) {
     await setDoc(doc(db, "Users", user.uid), {
     name: name,
     email: email,
-    status: "Active", // সরাসরি একটিভ
-    myCourses: [],    // কোর্স লিস্ট খালি থাকবে
+    status: "Active",
     role: "student",
+    myCourses: [],
+    myBooks: [], // কেনা বইয়ের তালিকা
+    interests: [], // পছন্দের কিওয়ার্ড
+    profilePic: "",
+    onboardingCompleted: false, // এটি চেক করেই পপআপ দেখাবো
     createdAt: new Date()
 });
 
