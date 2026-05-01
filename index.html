@@ -10,25 +10,62 @@
 <body>
     <div class="wrapper">
     <header>
-        <div class="container">
-            <nav>
-    <div class="logo"><h1>Tarbiyah</h1></div>
+    <div class="container">
+        <nav style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+            
+            <!-- ১. লোগো -->
+            <div class="logo">
+                <a href="index.html"><h1>Tarbiyah</h1></a>
+            </div>
 
-    <!-- নতুন সার্চ বক্স (মাঝখানে থাকবে) -->
-    <div class="search-container">
-        <input type="text" id="site-search" placeholder="Search courses, books...">
-        <button id="search-btn"><i class="fas fa-search"></i></button>
+            <!-- ২. সার্চ বক্স (মাঝখানে) -->
+            <div class="search-container" style="flex: 1; max-width: 250px; margin: 0 15px;">
+                <form id="global-search-form" style="display: flex; background: var(--bg-light); border-radius: 20px; padding: 4px 12px; border: 1px solid #ddd;">
+                    <input type="text" id="site-search" placeholder="Search..." style="border: none; background: transparent; outline: none; width: 100%; font-size: 0.9rem;">
+                    <button type="submit" style="border: none; background: transparent; cursor: pointer;"><i class="fas fa-search" style="font-size: 0.8rem;"></i></button>
+                </form>
+            </div>
+
+            <!-- ৩. মেইন মেনু লিঙ্কসমূহ -->
+            <ul class="nav-links" id="nav-links" style="display: flex; align-items: center; gap: 15px;">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="courses.html">Courses</a></li>
+                <li><a href="teachers.html">Teachers</a></li>
+                
+                <!-- ৪. নতুন Publications ড্রপডাউন (ব্লগ ও বই এর জন্য) -->
+                <li class="dropdown" style="position: relative; cursor: pointer;">
+                    <a href="#">Publications <i class="fas fa-chevron-down" style="font-size: 0.7rem;"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="blog.html">Blog Articles</a></li>
+                        <li><a href="books.html">PDF Books</a></li>
+                        <li><a href="research.html">Research</a></li>
+                    </ul>
+                </li>
+
+                <li><a href="about.html">About</a></li>
+                
+                <!-- ৫. ভাষা ও ডার্ক মোড -->
+                <li><button id="lang-switch" class="btn" style="padding: 4px 8px; background: transparent; border: 1px solid var(--soft-gold); color: var(--soft-gold); font-size: 0.7rem;">বাং</button></li>
+                <li><button id="dark-mode-toggle" style="background: none; border: none; font-size: 1.1rem; cursor: pointer;">🌙</button></li>
+
+                <!-- ৬. লগইন/ড্যাশবোর্ড (ডাইনামিক) -->
+                <li id="logged-out-menu">
+                    <a href="login.html" id="nav-auth-btn" class="btn" style="padding: 7px 12px; font-size: 0.85rem;">Login</a>
+                </li>
+                <li id="logged-in-menu" class="hidden" style="display: flex; align-items: center; gap: 12px;">
+                    <a href="#" class="notification-bell" style="position: relative;">
+                        <i class="fas fa-bell"></i>
+                        <span class="notify-badge" style="position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 0.6rem; padding: 2px 4px; border-radius: 50%;">0</span>
+                    </a>
+                    <a href="dashboard.html" class="btn" style="padding: 7px 12px; font-size: 0.85rem; border: 1px solid var(--primary-green); background: transparent; color: var(--primary-green);">Dashboard</a>
+                </li>
+            </ul>
+
+            <!-- হ্যামবার্গার মেনু (মোবাইলের জন্য) -->
+            <div class="hamburger" id="hamburger" style="display: none; font-size: 1.5rem; cursor: pointer; margin-left: 10px;">☰</div>
+        </nav>
     </div>
-
-    <ul class="nav-links">
-        <!-- ভাষা পরিবর্তন বাটন -->
-        <li><button id="lang-switch" class="btn" style="padding: 5px 10px; background: transparent; border-color: var(--soft-gold); color: var(--soft-gold);">বাং</button></li>
-        
-        <!-- আগের অন্যান্য লিঙ্ক... -->
-    </ul>
-</nav>
-        </div>
-    </header>
+</header>
 
     <main>
         <section class="hero"><!-- Promotional Offer Section -->
