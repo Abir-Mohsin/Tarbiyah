@@ -74,8 +74,8 @@
                     <i class="fas fa-book-open"></i> Publications <i class="fas fa-chevron-down"></i>
                     <ul class="sub-menu">
                         <li id="tab-manage-blogs">Blog Articles</li>
-                        <li id="tab-manage-books">PDF Books (Store)</li>
-                        <li id="tab-manage-research">Research Papers</li>
+                        <li id="tab-manage-books">Manage Books</li>
+                        <li id="tab-manage-research">Manage Research</li>
                     </ul>
                 </li>
 
@@ -199,8 +199,52 @@
                       <tbody id="blogs-table-body"></tbody>
                    </table>
                  </div>
-            
 
+                 <!-- ১. বই আপলোড ফর্ম -->
+<div id="manage-books-view" class="admin-card hidden">
+    <h3>Upload New PDF Book</h3>
+    <form id="book-upload-form" class="grid">
+        <input type="text" id="bk-title" placeholder="Book Title" required>
+        <input type="text" id="bk-author" placeholder="Author Name" required>
+        <input type="text" id="bk-img" placeholder="Cover Image URL" required>
+        <input type="text" id="bk-pdf" placeholder="PDF File Link (Google Drive/Dropbox)" required>
+        <input type="text" id="bk-price" placeholder="Price (0 for Free)" required>
+        <textarea id="bk-desc" placeholder="Brief Description" style="grid-column: span 2;"></textarea>
+        <button type="submit" class="btn">Publish Book</button>
+    </form>
+    <div class="table-wrapper">
+        <h4>Existing Books</h4>
+        <table>
+            <thead><tr><th>Title</th><th>Price</th><th>Action</th></tr></thead>
+            <tbody id="books-table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ২. রিসার্চ আপলোড ফর্ম -->
+<div id="manage-research-view" class="admin-card hidden">
+    <h3>Publish Research Paper</h3>
+    <form id="research-upload-form" class="grid">
+        <input type="text" id="res-title" placeholder="Research Title" required style="grid-column: span 2;">
+        <input type="text" id="res-link" placeholder="Document Link" required>
+        <input type="text" id="res-category" placeholder="Category">
+        <button type="submit" class="btn">Add Research Paper</button>
+    </form>
+    <div class="table-wrapper">
+    <h4>Existing Research Papers</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="research-table-body"></tbody>
+    </table>
+</div>
+</div>
+            
             <!-- Teachers Management -->
             <div id="manage-teachers-view" class="admin-card hidden">
     <h3>Manage Teachers</h3>

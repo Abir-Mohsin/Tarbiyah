@@ -250,3 +250,98 @@ document.getElementById('confirm-assign')?.addEventListener('click', async () =>
         alert("Assigned!"); document.getElementById('course-modal').classList.add('hidden'); loadUsers();
     }
 });
+
+// বই আপলোড এবং লিস্ট লোড করার লজিক
+document.getElementById('tab-manage-books')?.addEventListener('click', () => { 
+    showSection('manage-books-view'); 
+    loadBooks(); 
+});
+
+const bookForm = document.getElementById('book-upload-form');
+bookForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        await addDoc(collection(db, "Books"), {
+            title: document.getElementById('bk-title').value,
+            author: document.getElementById('bk-author').value,
+            image: document.getElementById('bk-img').value,
+            pdf: document.getElementById('bk-pdf').value,
+            price: document.getElementById('bk-price').value,
+            description: document.getElementById('bk-desc').value,
+            createdAt: new Date()
+        });
+        alert("Book Added!"); bookForm.reset(); loadBooks();
+    } catch (e) { alert("Error!"); }
+});
+
+async function loadBooks() {
+    const tbody = document.getElementById('books-table-body');
+    if(!tbody) return;
+    const snap = await getDocs(collection(db, "Books"));
+    tbody.innerHTML = '';
+    snap.forEach(doc => {
+        const b = doc.data();
+        tbody.innerHTML += `<tr><td>${b.title}</td><td>${b.price}</td><td><button onclick="deleteDocById('Books', '${doc.id}')" class="btn" style="background:red; padding:5px;">Delete</button></td></tr>`;
+    });
+}
+
+// --- Research Management Logic ---
+
+// ১. ট্যাব ক্লিক করলে রিসার্চ সেকশন ও ডাটা লোড হবে
+document.getElementById('tab-manage-research')?.addEventListener('click', () => { 
+    showSection('manage-research-view'); 
+    loadResearch(); 
+});
+
+// ২. রিসার্চ পেপার সেভ করার লজিক
+const resForm = document.getElementById('research-upload-form');
+resForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        await addDoc(collection(db, "Research"), {
+            title: document.getElementById('res-title').value,
+            link: document.getElementById('res-link').value,
+            category: document.getElementById('res-category').value,
+            createdAt: new Date()
+        });
+        alert("Research Paper Added!");
+        resForm.reset();
+        loadResearch(); // টেবিল আপডেট করবে
+    } catch (e) {
+        alert("Error adding research paper!");
+    }
+});
+
+// ৩. রিসার্চ লিস্ট লোড করার ফাংশন
+async function loadResearch() {
+    const tbody = document.getElementById('research-table-body');
+    if(!tbody) return;
+    
+    const snap = await getDocs(collection(db, "Research"));
+    tbody.innerHTML = '';
+    
+    snap.forEach(doc => {
+        const r = doc.data();
+        tbody.innerHTML += `
+            <tr>
+                <td>${r.title}</td>
+                <td>${r.category || 'General'}</td>
+                <td>
+                    <button onclick="deleteDocById('Research', '${doc.id}')" class="btn" style="background:red; padding:5px;">Delete</button>
+                </td>
+            </tr>`;
+    });
+}
+
+// ৪. ডিলিট করার জন্য একটি কমন ফাংশন (যদি আগে না থাকে)
+window.deleteDocById = async (collectionName, id) => {
+    if(confirm("Are you sure you want to delete this?")) {
+        try {
+            await deleteDoc(doc(db, collectionName, id));
+            alert("Deleted successfully!");
+            // পেজ অনুযায়ী লিস্ট রিফ্রেশ
+            if(collectionName === 'Books') loadBooks();
+            if(collectionName === 'Research') loadResearch();
+        } catch (e) { alert("Error deleting!"); }
+    }
+};
