@@ -87,7 +87,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         <li id="tab-manage-research">Manage Research</li>
                     </ul>
                 </li>
-
+                <li class="has-dropdown" onclick="toggleDropdown(this)">
+                    <i class="fas fa-file-alt"></i> Pages <i class="fas fa-chevron-down"></i>
+                    <ul class="sub-menu">
+                        <li id="tab-manage-homepage"><i class="fas fa-home"></i> Manage Homepage</li>
+                    </ul>
+                </li>
                 <li id="tab-theme-settings"><i class="fas fa-paint-roller"></i> Theme & Logo</li>
                 <li onclick="location.reload()" style="color: #ff4757; margin-top: 30px;"><i class="fas fa-sign-out-alt"></i> Logout</li>
             </ul>
@@ -305,7 +310,29 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     </table>
 </div>
 </div>
-            
+            <div id="manage-homepage-view" class="admin-card hidden">
+    <h3>Manage Homepage Elements</h3>
+    
+    <!-- ১. স্লাইডার আপডেট -->
+    <div style="border-bottom: 1px solid #ddd; padding-bottom: 20px; margin-bottom: 20px;">
+        <h4>Add Hero Slide</h4>
+        <form id="add-slide-form" class="grid">
+            <input type="text" id="slide-title" placeholder="Slide Title" required>
+            <input type="text" id="slide-img" placeholder="Background Image URL" required>
+            <button type="submit" class="btn">Add Slide</button>
+        </form>
+    </div>
+
+    <!-- ২. ভিডিও রিভিউ আপডেট -->
+    <div>
+        <h4>Add Video Review</h4>
+        <form id="add-video-review-form" class="grid">
+            <input type="text" id="rev-name" placeholder="Student Name" required>
+            <input type="text" id="rev-youtube-id" placeholder="YouTube Video ID" required>
+            <button type="submit" class="btn">Add Video Review</button>
+        </form>
+    </div>
+</div>
             <!-- Teachers Management -->
             <div id="manage-teachers-view" class="admin-card hidden">
     <h3>Manage Teachers</h3>

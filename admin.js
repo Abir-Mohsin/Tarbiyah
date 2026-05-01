@@ -425,3 +425,28 @@ async function initAnalytics() {
         }
     });
 }
+
+// হোমপেজ ম্যানেজমেন্ট ট্যাব ওপেন
+document.getElementById('tab-manage-homepage')?.addEventListener('click', () => showSection('manage-homepage-view'));
+
+// স্লাইড সেভ করা
+document.getElementById('add-slide-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await addDoc(collection(db, "HomepageSlides"), {
+        title: document.getElementById('slide-title').value,
+        image: document.getElementById('slide-img').value,
+        createdAt: new Date()
+    });
+    alert("Slide Added!"); e.target.reset();
+});
+
+// ভিডিও রিভিউ সেভ করা
+document.getElementById('add-video-review-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await addDoc(collection(db, "VideoReviews"), {
+        name: document.getElementById('rev-name').value,
+        youtubeId: document.getElementById('rev-youtube-id').value,
+        createdAt: new Date()
+    });
+    alert("Video Review Added!"); e.target.reset();
+});

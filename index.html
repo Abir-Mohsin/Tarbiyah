@@ -76,67 +76,41 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </header>
 
     <main>
-        <section class="hero"><!-- Promotional Offer Section -->
-<section class="container">
-    <div class="offer-card">
-        <h2>🔥 Ramadan Special Offer!</h2>
-        <p>Get 50% off on all Premium Courses. Use code: RAMADAN50</p>
-        <br>
-        <a href="courses.html" class="btn" style="background: white; color: #1B4332; border: none;">Claim Offer Now</a>
-    </div>
-</section>
-
-<!-- Student Reviews Slider Section -->
-<section class="section container">
-    <h2 class="section-title">What Our Students Say</h2>
-    <div class="slider-container">
-        <!-- Review 1 -->
-        <div class="slide-card">
-            <div style="color: var(--soft-gold); margin-bottom: 10px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-            <p>"The Classical Arabic course completely changed how I read the Quran. MashaAllah, amazing platform!"</p>
-            <h4 style="margin-top: 15px;">- Abdullah Ibn Musa</h4>
-        </div>
-        <!-- Review 2 -->
-        <div class="slide-card">
-            <div style="color: var(--soft-gold); margin-bottom: 10px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-            <p>"The dashboard is so easy to use. I can track my progress and ask questions directly to the teachers."</p>
-            <h4 style="margin-top: 15px;">- Fatima Rahman</h4>
-        </div>
-        <!-- Review 3 -->
-        <div class="slide-card">
-            <div style="color: var(--soft-gold); margin-bottom: 10px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-            <p>"Islamic Psychology course bridged the gap between modern science and our Deen. Highly recommended."</p>
-            <h4 style="margin-top: 15px;">- Dr. Omar</h4>
-        </div>
-    </div>
-</section>
-            <div class="container">
-                <h1>Welcome to Tarbiyah Institute</h1>
-                <p>Bridging the gap between traditional Islamic wisdom and modern contemporary sciences.</p>
-                <br>
-                <a href="admission.html" class="btn">Apply Now</a>
-                <a href="courses.html" class="btn" style="background: transparent; color: var(--soft-gold);">Explore Courses</a>
+    <!-- ১. প্রিমিয়াম হিরো স্লাইডার -->
+    <section class="hero-slider" id="home-slider">
+        <!-- স্লাইডারগুলো JS দিয়ে ফায়ারবেস থেকে আসবে -->
+        <div class="slide active">
+            <div class="slide-overlay">
+                <h2>Empowering the Ummah</h2>
+                <p>Traditional Wisdom meets Modern Excellence.</p><br>
+                <a href="courses.html" class="btn">Explore Courses</a>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="section container">
-            <h2 class="section-title">Our Featured Courses</h2>
-            <div class="grid">
-                <div class="card">
-                    <h3>Qur'anic Arabic</h3>
-                    <p>Learn the language of the Qur'an to understand the divine words directly.</p>
-                </div>
-                <div class="card">
-                    <h3>Islamic Psychology</h3>
-                    <p>Integrate human psychology with the profound insights of Islamic spirituality.</p>
-                </div>
-                <div class="card">
-                    <h3>Modern Dawah</h3>
-                    <p>Equip yourself with the tools to convey the message of Islam in the 21st century.</p>
-                </div>
-            </div>
-        </section>
-    </main>
+    <!-- ২. অফার সেকশন -->
+    <section class="container" style="margin-top: -50px; position: relative; z-index: 10;">
+        <div id="dynamic-offer-area">
+            <!-- অ্যাডমিন থেকে অফার কার্ড এখানে আসবে -->
+        </div>
+    </section>
+
+    <!-- ৩. ভিডিও রিভিউ সেকশন -->
+    <section class="section container">
+        <h2 class="section-title">Success Stories (Video Reviews)</h2>
+        <div class="video-review-grid" id="video-reviews-list">
+            <!-- ভিডিও কার্ডগুলো এখানে লোড হবে -->
+        </div>
+    </section>
+
+    <!-- ৪. জেনারেল রিভিউ স্লাইডার (আগে যেটা দিয়েছিলাম) -->
+    <section class="section container">
+        <h2 class="section-title">What Our Students Say</h2>
+        <div class="slider-container" id="text-reviews-list">
+            <!-- টেক্সট রিভিউগুলো এখানে আসবে -->
+        </div>
+    </section>
+</main>
 
     <footer>
         <div class="container">

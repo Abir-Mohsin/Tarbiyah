@@ -336,3 +336,38 @@ body.dark-mode .notification-bell { color: var(--soft-gold); }
     .nav-links li { font-size: 0.85rem; }
     .search-container { max-width: 180px; }
 }
+
+/* --- Premium Hero Slider --- */
+.hero-slider {
+    position: relative; width: 100%; height: 500px; 
+    overflow: hidden; border-bottom: 5px solid var(--soft-gold);
+}
+.slide {
+    position: absolute; width: 100%; height: 100%; opacity: 0;
+    transition: opacity 1s ease-in-out; display: flex; align-items: center;
+    background-size: cover; background-position: center;
+}
+.slide.active { opacity: 1; }
+.slide-overlay {
+    background: rgba(0, 0, 0, 0.6); width: 100%; height: 100%;
+    display: flex; flex-direction: column; justify-content: center;
+    align-items: center; color: white; text-align: center; padding: 20px;
+}
+.slide-overlay h2 { color: var(--soft-gold); font-size: 3rem; margin-bottom: 15px; }
+
+/* --- Video Review Cards --- */
+.video-review-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px;
+}
+.video-card {
+    background: var(--card-bg); border-radius: 15px; overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 1px solid #eee;
+}
+.video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; }
+.video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.video-info { padding: 15px; text-align: center; }
+
+@media (max-width: 768px) {
+    .hero-slider { height: 350px; }
+    .slide-overlay h2 { font-size: 2rem; }
+}
