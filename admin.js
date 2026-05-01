@@ -1,75 +1,12 @@
 /* 
-   Tarbiyah Admin Master Script - Final Fixed Version
-   ফিচার: Admissions, Users, Courses, Videos, Blogs, Teachers, Settings.
+   Tarbiyah Admin Master Script (Final Merged Version)
+   Features: Sidebar, Theming, Rich Text Editor, LMS Control, Users.
 */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { 
     getFirestore, collection, getDocs, addDoc, updateDoc, setDoc, doc, deleteDoc, getDoc, arrayUnion, query, orderBy 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-// admin.js এর উপরের দিকে এই কোডটি দিয়ে Quill চালু করুন
-const quill = new Quill('#quill-editor', {
-    theme: 'snow',
-    modules: {
-        toolbar: [
-            [{ 'header': [1, 2, 3, false] }],['bold', 'italic', 'underline', 'strike'],
-            [{ 'color': [] }, { 'background': [] }],[{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            ['link', 'image', 'video'],
-            ['clean'] // ফরম্যাট রিমুভ করার জন্য
-        ]
-    },
-    placeholder: 'Write your beautiful article here...'
-});
-
-// ব্লগ সেভ লজিক আপডেট (quill.root.innerHTML ব্যবহার করতে হবে)
-const bForm = document.getElementById('blog-upload-form');
-bForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const editId = document.getElementById('edit-blog-id').value;
-    
-    // এডিটর থেকে HTML কোড টেনে আনা
-    const richContent = quill.root.innerHTML;
-
-    if (richContent === "<p><br></p>") {
-        alert("Content cannot be empty!");
-        return;
-    }
-
-    const data = { 
-        title: document.getElementById('b-title').value, 
-        image: document.getElementById('b-img').value, 
-        content: richContent, // আগে b-content ছিল, এখন richContent
-        createdAt: new Date() 
-    };
-
-    try {
-        if (editId) await updateDoc(doc(db, "Blogs", editId), data);
-        else await addDoc(collection(db, "Blogs"), data);
-        
-        alert("Blog Article Saved!"); 
-        bForm.reset(); 
-        quill.root.innerHTML = ""; // এডিটর খালি করা
-        document.getElementById('edit-blog-id').value = ""; 
-        loadBlogs();
-    } catch (error) {
-        alert("Error saving blog!");
-    }
-});
-
-// ব্লগ এডিট ফাংশন আপডেট (Editor-এ ডাটা বসানো)
-window.editBlog = async (id) => {
-    const snap = await getDoc(doc(db, "Blogs", id));
-    const b = snap.data();
-    document.getElementById('b-title').value = b.title;
-    document.getElementById('b-img').value = b.image;
-    
-    // Editor এর ভেতরে ডাটা বসানো
-    quill.root.innerHTML = b.content; 
-    
-    document.getElementById('edit-blog-id').value = id;
-    window.scrollTo(0,0);
-};
 
 // ১. ফায়ারবেস কনফিগারেশন
 const firebaseConfig = {
@@ -89,7 +26,7 @@ const db = getFirestore(app);
 const loginBtn = document.getElementById('login-btn');
 const passwordInput = document.getElementById('admin-pass');
 const loginSection = document.getElementById('login-section');
-const adminWrapper = document.querySelector('.admin-wrapper');
+const adminWrapper = document.getElementById('admin-dashboard-wrapper');
 const ADMIN_PASSWORD = "admin123"; 
 
 if (loginBtn) {
@@ -104,8 +41,8 @@ if (loginBtn) {
     });
 }
 
-// ৩. সাইডবার ট্যাব পরিবর্তন লজিক
-function showSection(id) {
+// ৩. সাইডবার লজিক (ট্যাব সুইচিং)
+window.showSection = function(id) {
     document.querySelectorAll('.admin-card').forEach(card => card.classList.add('hidden'));
     document.querySelectorAll('.sidebar-links li').forEach(li => li.classList.remove('active'));
     
@@ -117,17 +54,35 @@ function showSection(id) {
     if(activeTab) activeTab.classList.add('active');
 }
 
-// ট্যাব বাটন লিসেনারস
+// সাইডবার ইভেন্ট লিসেনারস
 document.getElementById('tab-admissions')?.addEventListener('click', () => { showSection('admissions-view'); loadAdmissions(); });
 document.getElementById('tab-users')?.addEventListener('click', () => { showSection('users-view'); loadUsers(); });
 document.getElementById('tab-manage-courses')?.addEventListener('click', () => showSection('manage-courses-view'));
 document.getElementById('tab-add-video')?.addEventListener('click', () => showSection('add-video-view'));
-document.getElementById('tab-manage-blogs')?.addEventListener('click', () => { showSection('manage-blogs-view'); loadBlogs(); });
 document.getElementById('tab-manage-teachers')?.addEventListener('click', () => { showSection('manage-teachers-view'); loadTeachers(); });
-document.getElementById('tab-settings')?.addEventListener('click', () => showSection('settings-view'));
+document.getElementById('tab-manage-blogs')?.addEventListener('click', () => { showSection('manage-blogs-view'); loadBlogs(); });
+document.getElementById('tab-theme-settings')?.addEventListener('click', () => showSection('theme-settings-view'));
 
-// ৪. ডাটা লোড করার ফাংশনসমূহ (Blogs, Teachers, Users, Admissions)
 
+// ৪. Quill.js Rich Text Editor চালু করা (ব্লগের জন্য)
+let quill;
+if (document.getElementById('quill-editor')) {
+    quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        modules: {
+            toolbar:[
+                [{ 'header': [1, 2, 3, false] }],['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],[{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link', 'image', 'video'],
+                ['clean']
+            ]
+        },
+        placeholder: 'Write your beautiful article here...'
+    });
+}
+
+
+// ৫. ডাটা লোড করার ফাংশনসমূহ
 async function loadAdmissions() {
     const tbody = document.querySelector('#admissions-table tbody');
     if(!tbody) return;
@@ -147,7 +102,7 @@ async function loadUsers() {
     snap.forEach(userDoc => {
         const u = userDoc.data();
         const courses = u.myCourses ? u.myCourses.join(", ") : "None";
-        tbody.innerHTML += `<tr><td>${u.name}</td><td>${u.email}</td><td>${courses}</td><td><button class="btn" onclick="openAssignModal('${userDoc.id}')">Assign</button></td></tr>`;
+        tbody.innerHTML += `<tr><td>${u.name}</td><td>${u.email}</td><td>${courses}</td><td><button class="btn" onclick="openAssignModal('${userDoc.id}')" style="padding:5px;">Assign Course</button></td></tr>`;
     });
 }
 
@@ -159,7 +114,7 @@ async function loadBlogs() {
     tbody.innerHTML = '';
     snap.forEach(bDoc => {
         const b = bDoc.data();
-        tbody.innerHTML += `<tr><td>${b.title}</td><td><img src="${b.image}" width="50"></td><td>
+        tbody.innerHTML += `<tr><td>${b.title}</td><td><img src="${b.image}" width="50" style="border-radius:5px;"></td><td>
             <button class="btn" onclick="editBlog('${bDoc.id}')" style="padding:5px;">Edit</button>
             <button class="btn" onclick="deleteBlog('${bDoc.id}')" style="padding:5px; background:red;">Delete</button>
         </td></tr>`;
@@ -180,17 +135,50 @@ async function loadTeachers() {
     });
 }
 
-// ৫. ফর্ম সাবমিশন লজিক (Add/Update)
 
-// ব্লগ সেভ
+// ৬. ফর্ম সাবমিশন লজিকসমূহ
+
+// ব্লগ সেভ (Rich Text Editor সহ)
 const bForm = document.getElementById('blog-upload-form');
 bForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const editId = document.getElementById('edit-blog-id').value;
-    const data = { title: document.getElementById('b-title').value, image: document.getElementById('b-img').value, content: document.getElementById('b-content').value, createdAt: new Date() };
-    if (editId) await updateDoc(doc(db, "Blogs", editId), data);
-    else await addDoc(collection(db, "Blogs"), data);
-    alert("Saved!"); bForm.reset(); document.getElementById('edit-blog-id').value = ""; loadBlogs();
+    const richContent = quill.root.innerHTML;
+
+    if (richContent === "<p><br></p>") return alert("Content cannot be empty!");
+
+    const data = { 
+        title: document.getElementById('b-title').value, 
+        image: document.getElementById('b-img').value, 
+        content: richContent, 
+        createdAt: new Date() 
+    };
+
+    try {
+        if (editId) await updateDoc(doc(db, "Blogs", editId), data);
+        else await addDoc(collection(db, "Blogs"), data);
+        alert("Blog Article Saved!"); 
+        bForm.reset(); 
+        quill.root.innerHTML = ""; 
+        document.getElementById('edit-blog-id').value = ""; 
+        loadBlogs();
+    } catch(err) { alert("Error saving blog!"); }
+});
+
+// থিম সেটিংস সেভ
+const themeForm = document.getElementById('theme-settings-form');
+themeForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        await setDoc(doc(db, "Settings", "theme"), {
+            siteName: document.getElementById('s-name').value || "Tarbiyah",
+            logoImg: document.getElementById('s-logo-img').value || "",
+            primaryColor: document.getElementById('s-primary-color').value || "#1B4332",
+            accentColor: document.getElementById('s-accent-color').value || "#D4AF37",
+            fontUrl: document.getElementById('s-font-url').value || ""
+        });
+        alert("MashaAllah! Theme and Branding Updated.");
+    } catch (e) { alert("Theme update failed!"); }
 });
 
 // টিচার সেভ
@@ -201,7 +189,7 @@ tForm?.addEventListener('submit', async (e) => {
     const data = { name: document.getElementById('t-name').value, subject: document.getElementById('t-subject').value, image: document.getElementById('t-img').value, bio: document.getElementById('t-bio').value };
     if (editId) await updateDoc(doc(db, "Teachers", editId), data);
     else await addDoc(collection(db, "Teachers"), data);
-    alert("Saved!"); tForm.reset(); document.getElementById('edit-teacher-id').value = ""; loadTeachers();
+    alert("Teacher Saved!"); tForm.reset(); document.getElementById('edit-teacher-id').value = ""; loadTeachers();
 });
 
 // ভিডিও সেভ
@@ -218,14 +206,15 @@ document.getElementById('course-create-form')?.addEventListener('submit', async 
     alert("Course Published!"); e.target.reset();
 });
 
-// ৬. গ্লোবাল ফাংশনস (Window Object) যাতে HTML থেকে কাজ করে
+
+// ৭. গ্লোবাল উইন্ডো ফাংশনসমূহ (টেবিল থেকে কল করার জন্য)
 
 window.editBlog = async (id) => {
     const snap = await getDoc(doc(db, "Blogs", id));
     const b = snap.data();
     document.getElementById('b-title').value = b.title;
     document.getElementById('b-img').value = b.image;
-    document.getElementById('b-content').value = b.content;
+    quill.root.innerHTML = b.content; // এডিটরে কন্টেন্ট বসানো
     document.getElementById('edit-blog-id').value = id;
     window.scrollTo(0,0);
 };
@@ -260,33 +249,4 @@ document.getElementById('confirm-assign')?.addEventListener('click', async () =>
         await updateDoc(doc(db, "Users", window.selectedUserUid), { myCourses: arrayUnion(courseName), status: "Active" });
         alert("Assigned!"); document.getElementById('course-modal').classList.add('hidden'); loadUsers();
     }
-});
-
-// admin.js এর একদম নিচে যোগ করুন
-
-// Theme & Branding Settings Save
-const themeForm = document.getElementById('theme-settings-form');
-themeForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    try {
-        const themeData = {
-            siteName: document.getElementById('s-name').value || "Tarbiyah",
-            logoImg: document.getElementById('s-logo-img').value || "",
-            primaryColor: document.getElementById('s-primary-color').value || "#1B4332",
-            accentColor: document.getElementById('s-accent-color').value || "#D4AF37",
-            fontUrl: document.getElementById('s-font-url').value || ""
-        };
-
-        // Settings কালেকশনে theme নামের ডকুমেন্টে সেভ হবে
-        await setDoc(doc(db, "Settings", "theme"), themeData);
-        alert("MashaAllah! Theme and Branding Updated Successfully.");
-    } catch (error) {
-        console.error("Theme Update Error: ", error);
-        alert("Failed to update theme.");
-    }
-});
-
-// অ্যাডমিন প্যানেলে Theme ট্যাব ওপেন করার ইভেন্ট
-document.getElementById('tab-theme-settings')?.addEventListener('click', () => { 
-    showSection('theme-settings-view'); 
 });

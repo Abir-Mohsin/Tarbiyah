@@ -5,6 +5,7 @@
     <title>Tarbiyah | Blog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="wrapper">
@@ -14,16 +15,27 @@
                 <div class="logo">
                     <a href="index.html"><h1>Tarbiyah</h1></a>
                 </div>
-                <ul class="nav-links" id="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="courses.html">Courses</a></li>
-                    <li><a href="teachers.html">Teachers</a></li>
-                    <li><a href="admission.html">Admission</a></li>
-                    <li><a href="blog.html">Blog</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                    <li><a href="login.html" id="nav-auth-btn" class="btn" style="padding: 6px 18px; margin-left: 10px;">Student Login</a></li>
-                </ul>
+                <!-- Navbar এর <ul> অংশটুকু -->
+<ul class="nav-links" id="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="courses.html">Courses</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    
+    <!-- লগআউট অবস্থায় এটি দেখাবে -->
+    <li id="logged-out-menu">
+        <a href="login.html" class="btn" style="padding: 6px 18px; margin-left: 10px;">Student Login</a>
+    </li>
+
+    <!-- লগইন অবস্থায় এটি দেখাবে (শুরুতে লুকানো থাকবে) -->
+    <li id="logged-in-menu" class="user-menu hidden">
+        <a href="#" class="notification-bell">
+            <i class="fas fa-bell"></i>
+            <span class="notify-badge">2</span>
+        </a>
+        <a href="dashboard.html" class="btn" style="padding: 6px 18px; background: transparent; color: var(--primary-green); border: 2px solid var(--primary-green);">Dashboard</a>
+    </li>
+</ul>
                 <div class="controls">
                     <button id="dark-mode-toggle">🌙</button>
                     <div class="hamburger" id="hamburger">☰</div>

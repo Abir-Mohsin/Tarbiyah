@@ -209,3 +209,55 @@ function applyDynamicTheme() {
 
 // থিম ফাংশন চালু করা
 applyDynamicTheme();
+
+// script.js এর ভেতরে স্মার্ট হেডার লজিক আপডেট
+onAuthStateChanged(auth, (user) => {
+    const loggedOutMenu = document.getElementById('logged-out-menu');
+    const loggedInMenu = document.getElementById('logged-in-menu');
+
+    if (user) {
+        // ইউজার লগইন থাকলে
+        if (loggedOutMenu) loggedOutMenu.classList.add('hidden');
+        if (loggedInMenu) loggedInMenu.classList.remove('hidden');
+        
+        // (ঐচ্ছিক) ইউজারের নাম বা ছবি হেডারে দেখানো যেতে পারে ভবিষ্যতে
+    } else {
+        // লগইন না থাকলে
+        if (loggedOutMenu) loggedOutMenu.classList.remove('hidden');
+        if (loggedInMenu) loggedInMenu.classList.add('hidden');
+    }
+});
+
+// Language Dictionary
+const translations = {
+    'en': {
+        'home': 'Home',
+        'courses': 'Courses',
+        'login': 'Student Login',
+        'search_placeholder': 'Search courses, books...'
+    },
+    'bn': {
+        'home': 'হোম',
+        'courses': 'কোর্সসমূহ',
+        'login': 'লগইন করুন',
+        'search_placeholder': 'কোর্স বা বই খুঁজুন...'
+    }
+};
+
+let currentLang = localStorage.getItem('lang') || 'en';
+
+document.getElementById('lang-switch')?.addEventListener('click', () => {
+    currentLang = currentLang === 'en' ? 'bn' : 'en';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+});
+
+function applyLanguage() {
+    const btn = document.getElementById('lang-switch');
+    if(btn) btn.innerText = currentLang === 'en' ? 'বাং' : 'EN';
+    
+    // উদাহরন স্বরূপ কিছু টেক্সট চেঞ্জ করা (আপনাকে সব পেজে ডাটা-কি সেট করতে হবে)
+    document.getElementById('site-search').placeholder = translations[currentLang].search_placeholder;
+    // এখানে আরও কন্টেন্ট অ্যাড করতে পারেন
+}
+applyLanguage();

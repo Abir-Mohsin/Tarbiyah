@@ -8,6 +8,7 @@ import {
     getFirestore, doc, getDoc, collection, query, where, orderBy, getDocs, addDoc 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // ১. ফায়ারবেস কনফিগারেশন
 const firebaseConfig = {
@@ -30,25 +31,135 @@ let currentCourseVideos = [];
 let completedVideos = JSON.parse(localStorage.getItem('completedVideos')) || [];
 
 // ২. অথেনটিকেশন চেক এবং প্রোফাইল লোড করা
+let currentUserRef = null;
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        const userDoc = await getDoc(doc(db, "Users", user.uid));
+        currentUserRef = doc(db, "Users", user.uid);
+        const userDoc = await getDoc(currentUserRef);
+        
         if (userDoc.exists()) {
             const userData = userDoc.data();
             document.getElementById('student-name').innerText = userData.name || "Student";
             
-            if (userData.status === "Approved") {
-                const myCourses = userData.myCourses || [];
-                renderEnrolledCourses(myCourses);
+            // Stats Update
+            const myCourses = userData.myCourses ||[];
+            document.getElementById('stat-courses').innerText = myCourses.length;
+
+            // Onboarding Check
+            if (!userData.onboardingCompleted) {
+                document.getElementById('onboarding-modal').classList.remove('hidden');
             } else {
-                alert("Your account is pending approval.");
-                signOut(auth);
+                renderEnrolledCourses(myCourses);
+                loadExploreCourses(userData.interests ||[]);
             }
         }
     } else {
         window.location.href = "login.html";
     }
 });
+
+// Onboarding Keyword Selection Logic
+let selectedKeywords = [];
+
+document.querySelectorAll('.keyword-badge').forEach(badge => {
+    badge.addEventListener('click', () => {
+        const val = badge.getAttribute('data-val');
+        if (selectedKeywords.includes(val)) {
+            selectedKeywords = selectedKeywords.filter(k => k !== val);
+            badge.classList.remove('selected');
+        } else {
+            selectedKeywords.push(val);
+            badge.classList.add('selected');
+        }
+    });
+});
+
+// অনবোর্ডিং সেভ করা
+document.getElementById('complete-onboarding-btn')?.addEventListener('click', async () => {
+    if (selectedKeywords.length === 0) return alert("Please select at least one interest.");
+
+    const profilePic = document.getElementById('ob-profile-pic').value;
+
+    try {
+        await updateDoc(currentUserRef, {
+            interests: selectedKeywords,
+            profilePic: profilePic,
+            onboardingCompleted: true
+        });
+        document.getElementById('onboarding-modal').classList.add('hidden');
+        location.reload(); // ডাটা আপডেট করে পেজ রিফ্রেশ
+    } catch (e) { alert("Error saving profile!"); }
+});
+
+// ড্যাশবোর্ড ট্যাব সুইচিং লজিক
+document.querySelectorAll('.dash-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-target');
+
+        // ট্যাব বাটন পরিবর্তন
+        document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // সেকশন পরিবর্তন
+        document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(target).classList.add('active');
+    });
+});
+
+// Explore ট্যাব এর জন্য কোর্স লোড করা
+async function loadExploreCourses(userInterests) {
+    const freeArea = document.getElementById('free-courses-list'); // HTML এ এই ID টি দিতে হবে
+    const premiumArea = document.getElementById('premium-courses-list'); 
+
+    const q = query(collection(db, "Courses"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+
+    let freeHtml = "";
+    let premiumHtml = "";
+
+    snap.forEach(doc => {
+        const course = doc.data();
+        const card = `
+            <div class="card">
+                <img src="${course.image}" style="width:100%">
+                <h3>${course.title}</h3>
+                <p>${course.price == 0 ? 'FREE' : 'Price: ' + course.price}</p>
+                <button class="btn">${course.price == 0 ? 'Start Now' : 'Enroll Now'}</button>
+            </div>
+        `;
+
+        if (course.price == 0 || course.type === "free") {
+            freeHtml += card;
+        } else {
+            premiumHtml += card;
+        }
+    });
+
+    if(freeArea) freeArea.innerHTML = freeHtml || "No free courses yet.";
+    if(premiumArea) premiumArea.innerHTML = premiumHtml || "No premium courses yet.";
+    // ইন্টারেস্ট অনুযায়ী রেকমেন্ডেশন হাইলাইট করা এডিট করা
+    const exploreList = document.getElementById('explore-courses-list');
+    const q = query(collection(db, "Courses"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    
+    exploreList.innerHTML = "";
+    snap.forEach(doc => {
+        const course = doc.data();
+        // যদি ছাত্রের ইন্টারেস্টের সাথে কোর্স ট্যাগ মিলে যায়, তবে সেগুলোকে হাইলাইট করা যায়
+        const isRecommended = userInterests.includes(course.tag);
+
+        exploreList.innerHTML += `
+            <div class="card" style="${isRecommended ? 'border: 2px solid var(--soft-gold)' : ''}">
+                ${isRecommended ? '<small style="color:var(--soft-gold)">Recommended for you</small>' : ''}
+                <img src="${course.image}" style="width:100%; border-radius:8px;">
+                <h3>${course.title}</h3>
+                <p>Price: ${course.price}</p>
+                <a href="admission.html" class="btn">View Details</a>
+            </div>
+        `;
+    });
+}
 
 // ৩. কেনা কোর্সগুলোর তালিকা দেখানো
 function renderEnrolledCourses(courses) {
@@ -175,3 +286,79 @@ async function loadComments() {
 document.getElementById('logout-btn')?.addEventListener('click', () => {
     signOut(auth).then(() => window.location.href = "login.html");
 });
+
+// dashboard.js এর শেষে এই মাস্টার ফাংশনগুলো যোগ করুন
+
+// ১. সার্টিফিকেট জেনারেট করার ফাংশন (PDF)
+window.downloadCertificate = (courseName, studentName) => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: 'landscape'
+    });
+
+    // ডিজাইনের কাজ (গোল্ডেন বর্ডার)
+    doc.setDrawColor(212, 175, 55); 
+    doc.setLineWidth(10);
+    doc.rect(10, 10, 277, 190);
+
+    // টেক্সট বসানো
+    doc.setFont("Amiri", "bold");
+    doc.setFontSize(40);
+    doc.setTextColor(27, 67, 50); // Primary Green
+    doc.text("Certificate of Completion", 148, 60, { align: "center" });
+
+    doc.setFontSize(20);
+    doc.setTextColor(0, 0, 0);
+    doc.text("This is to certify that", 148, 90, { align: "center" });
+
+    doc.setFontSize(30);
+    doc.setTextColor(212, 175, 55); // Gold
+    doc.text(studentName, 148, 110, { align: "center" });
+
+    doc.setFontSize(20);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`has successfully completed the course`, 148, 130, { align: "center" });
+    
+    doc.setFont("Amiri", "bold");
+    doc.text(courseName, 148, 150, { align: "center" });
+
+    doc.setFontSize(14);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 148, 180, { align: "center" });
+
+    // PDF ডাউনলোড
+    doc.save(`${studentName}-${courseName}-Certificate.pdf`);
+};
+
+// ২. কুইজ লোড করার লজিক
+window.loadQuiz = async (courseTag) => {
+    const quizArea = document.getElementById('quiz-area');
+    quizArea.innerHTML = "Loading Quiz...";
+
+    const q = query(collection(db, "Quizzes"), where("course", "==", courseTag));
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+        quizArea.innerHTML = "No quiz available for this course yet.";
+        return;
+    }
+
+    let quizHtml = `<form id="active-quiz">`;
+    snap.forEach(doc => {
+        const data = doc.data();
+        quizHtml += `
+            <div class="form-group">
+                <p><strong>${data.question}</strong></p>
+                ${data.options.map(opt => `<label><input type="radio" name="${doc.id}" value="${opt}"> ${opt}</label><br>`).join('')}
+            </div><hr>
+        `;
+    });
+    quizHtml += `<button type="submit" class="btn">Submit Exam</button></form>`;
+    quizArea.innerHTML = quizHtml;
+
+    // কুইজ সাবমিট হ্যান্ডলার
+    document.getElementById('active-quiz').onsubmit = async (e) => {
+        e.preventDefault();
+        alert("Submitting... InshaAllah you will get the result soon.");
+        // এখানে রেজাল্ট ক্যালকুলেশন এবং ডাটাবেসে সেভ করার কোড থাকবে
+    };
+};

@@ -6,6 +6,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyByrLkl4953IvCNyVD7jXWUAvj-9AWfD10", 
@@ -64,3 +65,59 @@ if (loginForm) {
         }
     });
 }
+
+const auth = getAuth(app);
+
+// ১. Recaptcha সেটাআপ
+window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+    'size': 'invisible'
+});
+
+// ২. ওটিপি পাঠানো
+document.getElementById('send-otp-btn')?.addEventListener('click', () => {
+    const phoneNumber = document.getElementById('phone-number').value;
+    const appVerifier = window.recaptchaVerifier;
+
+    signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+        .then((confirmationResult) => {
+            window.confirmationResult = confirmationResult;
+            document.getElementById('otp-input-area').classList.remove('hidden');
+            alert("OTP Sent!");
+        }).catch((error) => { alert("Error: " + error.message); });
+});
+
+// ৩. ওটিপি ভেরিফাই
+document.getElementById('verify-otp-btn')?.addEventListener('click', () => {
+    const code = document.getElementById('otp-code').value;
+    window.confirmationResult.confirm(code).then((result) => {
+        checkUserRole(result.user);
+    }).catch(() => { alert("Invalid OTP!"); });
+});
+
+// ৪. রোল চেক ফাংশন
+async function checkUserRole(user) {
+    const userDoc = await getDoc(doc(db, "Users", user.uid));
+    if (userDoc.exists() && userDoc.data().role) {
+        window.location.href = "dashboard.html";
+    } else {
+        // রোল না থাকলে পপআপ দেখাবে
+        document.getElementById('role-modal').classList.remove('hidden');
+        window.tempUser = user;
+    }
+}
+
+// ৫. রোল সেট করা
+window.setRole = async (role) => {
+    const user = window.tempUser || auth.currentUser;
+    await setDoc(doc(db, "Users", user.uid), {
+        uid: user.uid,
+        email: user.email || "",
+        phone: user.phoneNumber || "",
+        role: role,
+        status: "Active",
+        createdAt: new Date()
+    }, { merge: true });
+
+    alert("Role set as " + role);
+    window.location.href = "dashboard.html";
+};

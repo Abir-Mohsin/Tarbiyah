@@ -5,39 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tarbiyah | Home</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="wrapper">
     <header>
         <div class="container">
             <nav>
-                <div class="logo">
-                    <a href="index.html"><h1>Tarbiyah</h1></a>
-                </div>
-                <ul class="nav-links" id="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="courses.html">Courses</a></li>
-                    <li><a href="teachers.html">Teachers</a></li>
-                    <li><a href="admission.html">Admission</a></li>
-                    <li><a href="blog.html">Blog</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                    <li>
-    <a href="login.html" id="nav-auth-btn" class="btn" style="padding: 6px 18px; margin-left: 10px;">
-                            Student Login
-                        </a>
-</li>
-                </ul>
-                <div class="controls">
-                    <button id="dark-mode-toggle">🌙</button>
-                    <div class="hamburger" id="hamburger">☰</div>
-                </div>
-            </nav>
+    <div class="logo"><h1>Tarbiyah</h1></div>
+
+    <!-- নতুন সার্চ বক্স (মাঝখানে থাকবে) -->
+    <div class="search-container">
+        <input type="text" id="site-search" placeholder="Search courses, books...">
+        <button id="search-btn"><i class="fas fa-search"></i></button>
+    </div>
+
+    <ul class="nav-links">
+        <!-- ভাষা পরিবর্তন বাটন -->
+        <li><button id="lang-switch" class="btn" style="padding: 5px 10px; background: transparent; border-color: var(--soft-gold); color: var(--soft-gold);">বাং</button></li>
+        
+        <!-- আগের অন্যান্য লিঙ্ক... -->
+    </ul>
+</nav>
         </div>
     </header>
 
     <main>
-        <section class="hero">
+        <section class="hero"><!-- Promotional Offer Section -->
+<section class="container">
+    <div class="offer-card">
+        <h2>🔥 Ramadan Special Offer!</h2>
+        <p>Get 50% off on all Premium Courses. Use code: RAMADAN50</p>
+        <br>
+        <a href="courses.html" class="btn" style="background: white; color: #1B4332; border: none;">Claim Offer Now</a>
+    </div>
+</section>
+
+<!-- Student Reviews Slider Section -->
+<section class="section container">
+    <h2 class="section-title">What Our Students Say</h2>
+    <div class="slider-container">
+        <!-- Review 1 -->
+        <div class="slide-card">
+            <div style="color: var(--soft-gold); margin-bottom: 10px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+            <p>"The Classical Arabic course completely changed how I read the Quran. MashaAllah, amazing platform!"</p>
+            <h4 style="margin-top: 15px;">- Abdullah Ibn Musa</h4>
+        </div>
+        <!-- Review 2 -->
+        <div class="slide-card">
+            <div style="color: var(--soft-gold); margin-bottom: 10px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+            <p>"The dashboard is so easy to use. I can track my progress and ask questions directly to the teachers."</p>
+            <h4 style="margin-top: 15px;">- Fatima Rahman</h4>
+        </div>
+        <!-- Review 3 -->
+        <div class="slide-card">
+            <div style="color: var(--soft-gold); margin-bottom: 10px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+            <p>"Islamic Psychology course bridged the gap between modern science and our Deen. Highly recommended."</p>
+            <h4 style="margin-top: 15px;">- Dr. Omar</h4>
+        </div>
+    </div>
+</section>
             <div class="container">
                 <h1>Welcome to Tarbiyah Institute</h1>
                 <p>Bridging the gap between traditional Islamic wisdom and modern contemporary sciences.</p>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard | Tarbiyah</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* ড্যাশবোর্ডের বিশেষ স্টাইল */
         .dashboard-header {
@@ -52,17 +53,34 @@
 <body>
     <div class="wrapper">
     <header>
+        <!-- PDF জেনারেট করার জন্য লাইব্রেরি -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
         <div class="container">
             <nav>
                 <div class="logo">
                     <a href="index.html"><h1>Tarbiyah</h1></a>
                 </div>
-                <ul class="nav-links" id="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="courses.html">Courses</a></li>
-                    <li><a href="admission.html">Admission</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
+                 <!-- Navbar এর <ul> অংশটুকু -->
+<ul class="nav-links" id="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="courses.html">Courses</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    
+    <!-- লগআউট অবস্থায় এটি দেখাবে -->
+    <li id="logged-out-menu">
+        <a href="login.html" class="btn" style="padding: 6px 18px; margin-left: 10px;">Student Login</a>
+    </li>
+
+    <!-- লগইন অবস্থায় এটি দেখাবে (শুরুতে লুকানো থাকবে) -->
+    <li id="logged-in-menu" class="user-menu hidden">
+        <a href="#" class="notification-bell">
+            <i class="fas fa-bell"></i>
+            <span class="notify-badge">2</span>
+        </a>
+        <a href="dashboard.html" class="btn" style="padding: 6px 18px; background: transparent; color: var(--primary-green); border: 2px solid var(--primary-green);">Dashboard</a>
+    </li>
+</ul>
                 <div class="controls">
                     <button id="dark-mode-toggle">🌙</button>
                     <div class="hamburger" id="hamburger">☰</div>
@@ -71,68 +89,133 @@
         </div>
     </header>
 
-    <main class="container">
-        <!-- ১. স্বাগতম সেকশন এবং লগআউট -->
-        <div class="dashboard-header">
-            <div>
-                <h2>Assalamu Alaikum, <span id="student-name">Student</span></h2>
-                <p>Welcome to your learning portal.</p>
+    <!-- dashboard.html এর <main> এর ভেতরের অংশ -->
+<main class="container">
+    
+    <!-- Onboarding Modal (শুরুতে লুকানো থাকবে, JS দিয়ে কন্ট্রোল হবে) -->
+    <div id="onboarding-modal" class="onboarding-overlay hidden">
+        <div class="onboarding-box">
+            <h2>Welcome to Tarbiyah! 🎓</h2>
+            <p style="margin-bottom: 20px;">Let's customize your learning experience.</p>
+            
+            <div class="form-group">
+                <label>Profile Picture URL (Optional)</label>
+                <input type="text" id="ob-profile-pic" placeholder="Paste an image link...">
             </div>
-            <button id="logout-btn" class="btn">Logout</button>
+
+            <p><strong>What topics interest you? (Select at least one)</strong></p>
+            <div id="keyword-selection" style="margin: 20px 0;">
+                <span class="keyword-badge" data-val="Arabic">Arabic Language</span>
+                <span class="keyword-badge" data-val="Quran">Quranic Studies</span>
+                <span class="keyword-badge" data-val="Psychology">Mental Health</span>
+                <span class="keyword-badge" data-val="Dawah">Dawah</span>
+                <span class="keyword-badge" data-val="History">Islamic History</span>
+            </div>
+
+            <button id="complete-onboarding-btn" class="btn" style="width: 100%;">Start Learning &rarr;</button>
         </div>
+    </div>
 
-        <!-- ২. কোর্স সিলেকশন এরিয়া (লগইন করার পর এখানে সব কেনা কোর্স দেখাবে) -->
-        <div id="course-selection">
-            <h3 style="margin-bottom: 20px;">My Enrolled Courses:</h3>
-            <div id="enrolled-courses-list" class="grid">
-                <!-- এখানে কেনা কোর্সের কার্ডগুলো অটোমেটিক আসবে -->
-                <p>Loading your courses...</p>
-            </div>
+    <!-- Student Header & Stats -->
+    <div class="dashboard-header" style="flex-direction: column; align-items: flex-start;">
+        <div style="display: flex; justify-content: space-between; width: 100%;">
+            <h2>Assalamu Alaikum, <span id="student-name">Student</span></h2>
+            <button id="logout-btn" class="btn" style="background: #e74c3c; border: none;">Logout</button>
         </div>
-
-        <!-- ৩. লার্নিং এরিয়া (ভিডিও প্লেয়ার - শুরুতে লুকানো থাকে) -->
-        <div id="learning-area" class="learning-area">
-            <div style="margin-bottom: 15px;">
-                <button onclick="location.reload()" class="btn" style="background: #666; border: none; padding: 5px 15px;">&larr; Back to Course List</button>
-                <h2 style="display: inline; margin-left: 15px;">Course: <span id="course-title">...</span></h2>
+        
+        <!-- Learning Report Stats -->
+        <div class="dash-stats-grid" style="width: 100%; margin-top: 20px;">
+            <div class="stat-box">
+                <h3 id="stat-courses">0</h3>
+                <p>Enrolled Courses</p>
             </div>
-
-            <!-- Progress Bar -->
-            <div class="progress-container">
-                <div class="progress-bar" id="progress-bar">0% Progress</div>
+            <div class="stat-box">
+                <h3 id="stat-hours">0</h3>
+                <p>Hours Learned</p>
             </div>
-
-            <div class="dashboard-container">
-                <!-- Left Side: Video & Comments -->
-                <div>
-                    <iframe id="video-frame" class="video-player" src="" frameborder="0" allowfullscreen></iframe>
-                    
-                    <div style="margin-top: 15px;">
-                        <button id="mark-complete-btn" class="btn">✔ Mark as Completed</button>
-                    </div>
-
-                    <!-- Comment Section -->
-                    <div class="comment-section">
-                        <h3>Discussion / Questions</h3>
-                        <textarea id="comment-input" class="comment-box" rows="3" placeholder="Ask a question about this lesson..."></textarea>
-                        <button id="post-comment-btn" class="btn">Post Question</button>
-                        
-                        <div id="comments-list" class="comment-list">
-                            <!-- Comments will load here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Side: Playlist -->
-                <div class="playlist">
-                    <h4 style="margin-bottom: 10px;">Course Lessons</h4>
-                    <div id="video-list">
-                        <!-- Playlist items will load here -->
-                    </div>
-                </div>
+            <div class="stat-box">
+                <h3 id="stat-books">0</h3>
+                <p>Books Read</p>
             </div>
         </div>
-    </main>
+    </div>
+
+    <!-- Dashboard Navigation Tabs -->
+    <div class="dash-nav">
+        <div class="dash-tab active" data-target="tab-learning">My Learning</div>
+        <div class="dash-tab" data-target="tab-explore">Explore Courses</div>
+        <div class="dash-tab" data-target="tab-live">Live Classes <span style="color:red; font-size:10px;">● LIVE</span></div>
+        <div class="dash-tab" data-target="tab-report">Full Report</div>
+    </div>
+
+    <!-- Tab 1: My Learning (এখানে তার কেনা কোর্সগুলো থাকবে) -->
+    <div id="tab-learning" class="dash-section active">
+        <h3 style="margin-bottom: 15px;">Continue Where You Left Off</h3>
+        <div id="enrolled-courses-list" class="grid">
+            <p>Loading your courses...</p>
+        </div>
+        
+        <!-- ভিডিও প্লেয়ার এরিয়া (লুকানো থাকবে, কোর্সে ক্লিক করলে আসবে) -->
+        <div id="learning-area" class="hidden" style="margin-top: 30px;">
+            <button onclick="location.reload()" class="btn" style="background: #666; margin-bottom:15px;">&larr; Back</button>
+            <iframe id="video-frame" class="video-player" src="" frameborder="0" allowfullscreen></iframe>
+            <div id="video-list" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- Tab 2: Explore (ফ্রি এবং প্রিমিয়াম কোর্স দেখাবে) -->
+    <div id="tab-explore" class="dash-section">
+        <h3>Recommended for You (Based on your interests)</h3>
+        <p style="color: #666; margin-bottom: 20px;">We found these courses matching your keywords.</p>
+        <div id="explore-courses-list" class="grid">
+            <p>Loading recommendations...</p>
+        </div>
+    </div>
+
+    <!-- Tab 3: Live Classes -->
+    <div id="tab-live" class="dash-section">
+        <div style="text-align: center; padding: 50px; background: var(--card-bg); border-radius: 10px;">
+            <i class="fas fa-video" style="font-size: 3rem; color: var(--primary-green); margin-bottom: 20px;"></i>
+            <h3>Upcoming Live Sessions</h3>
+            <p>No live classes scheduled for today. Check back later!</p>
+        </div>
+    </div>
+
+    <!-- Tab 4: Report -->
+    <div id="tab-report" class="dash-section">
+        <h3>Detailed Learning Analytics</h3>
+        <p>Charts and detailed progress will be shown here.</p>
+    </div>
+
+    <div class="dash-nav">
+    <div class="dash-tab active" data-target="tab-learning">My Learning</div>
+    <div class="dash-tab" data-target="tab-quiz">Quiz & Exam</div>
+    <div class="dash-tab" data-target="tab-certificates">Certificates</div>
+    <div class="dash-tab" data-target="tab-report">Report</div>
+</div>
+
+<!-- Tab: Quiz -->
+<div id="tab-quiz" class="dash-section">
+    <h3>Course Quizzes</h3>
+    <div id="quiz-area" class="admin-card">
+        <p>Please select a course from 'My Learning' first to see quizzes.</p>
+    </div>
+</div>
+
+<!-- Tab: Certificates -->
+<div id="tab-certificates" class="dash-section">
+    <h3>Your Certificates</h3>
+    <div id="certificate-list" class="grid">
+        <!-- এখানে সার্টিফিকেট ডাউনলোডের কার্ড আসবে -->
+    </div>
+</div>
+
+</main>
+
+<!-- Global WhatsApp Icon -->
+<a href="https://wa.me/8801788876206" class="whatsapp-float" target="_blank">
+    <i class="fab fa-whatsapp"></i>
+</a>
 </div>
     <!-- স্ক্রিপ্টগুলো মডিউল হিসেবে অ্যাড করা হয়েছে -->
     <script type="module" src="script.js"></script>

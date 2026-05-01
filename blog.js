@@ -53,6 +53,26 @@ async function loadBlogs() {
         console.error(error);
         blogContainer.innerHTML = "<p>Error loading blogs. Please try again later.</p>";
     }
+    querySnapshot.forEach((doc) => {
+            const blog = doc.data();
+            
+            // HTML ট্যাগ রিমুভ করে শুধু ক্লিন টেক্সট বের করা
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = blog.content;
+            const cleanText = tempDiv.textContent || tempDiv.innerText || "";
+            
+            const snippet = cleanText.length > 120 ? cleanText.substring(0, 120) + "..." : cleanText;
+
+            blogContainer.innerHTML += `
+                <div class="card">
+                    <img src="${blog.image || 'https://via.placeholder.com/400'}" alt="${blog.title}" style="width:100%; border-radius:10px; margin-bottom:15px;">
+                    <h3>${blog.title}</h3>
+                    <p>${snippet}</p>
+                    <br>
+                    <a href="view-blog.html?id=${doc.id}" class="btn" style="font-size: 0.8rem;">Read Full Article &rarr;</a>
+                </div>
+            `;
+        });
 }
 
 window.onload = loadBlogs;

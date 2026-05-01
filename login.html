@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Tarbiyah</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="wrapper">
@@ -62,6 +63,41 @@
                 Not paid yet? <a href="admission.html">Submit Admission Form</a>
             </p>
         </div>
+
+        <!-- login.html এর ভেতরে <main> এর শেষে এগুলো যোগ করুন -->
+
+<!-- Phone OTP Section -->
+<div id="phone-login-section" style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
+    <p style="text-align: center;">OR Login with Phone</p><br>
+    <div class="form-group">
+        <input type="tel" id="phone-number" placeholder="+88017XXXXXXXX">
+    </div>
+    <div id="recaptcha-container"></div> <!-- Firebase এর জন্য জরুরি -->
+    <button id="send-otp-btn" class="btn" style="width: 100%; background: #2d3436;">Send OTP</button>
+
+    <div id="otp-input-area" class="hidden" style="margin-top: 15px;">
+        <input type="text" id="otp-code" placeholder="Enter 6-digit OTP">
+        <button id="verify-otp-btn" class="btn" style="width: 100%; margin-top: 10px;">Verify & Login</button>
+    </div>
+</div>
+
+<!-- Role Selection Modal (লুকানো থাকবে) -->
+<div id="role-modal" class="role-overlay hidden">
+    <div class="role-box">
+        <h2>Join As</h2>
+        <p>Please select your account type to continue.</p>
+        <div class="role-options">
+            <div class="role-card" onclick="setRole('student')">
+                <i class="fas fa-user-graduate"></i>
+                <h4>Student</h4>
+            </div>
+            <div class="role-card" onclick="setRole('teacher')">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <h4>Teacher</h4>
+            </div>
+        </div>
+    </div>
+</div>
     </main>
 
     <footer>
