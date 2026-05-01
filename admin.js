@@ -345,3 +345,28 @@ window.deleteDocById = async (collectionName, id) => {
         } catch (e) { alert("Error deleting!"); }
     }
 };
+
+// কুইজ ট্যাব ওপেন
+document.getElementById('tab-manage-quiz')?.addEventListener('click', () => showSection('manage-quiz-view'));
+
+// কুইজ সেভ লজিক
+const quizForm = document.getElementById('quiz-create-form');
+quizForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        await addDoc(collection(db, "Quizzes"), {
+            course: document.getElementById('q-course-tag').value,
+            question: document.getElementById('q-question').value,
+            options: [
+                document.getElementById('q-opt1').value,
+                document.getElementById('q-opt2').value,
+                document.getElementById('q-opt3').value,
+                document.getElementById('q-correct').value
+            ],
+            correctAnswer: document.getElementById('q-correct').value,
+            createdAt: new Date()
+        });
+        alert("Question added!");
+        quizForm.reset();
+    } catch (e) { alert("Error!"); }
+});

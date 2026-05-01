@@ -1,13 +1,13 @@
 /* 
-   Tarbiyah Login Logic (login.js)
-   ফিচার: অথেনটিকেশন এবং অ্যাডমিন অ্যাপ্রুভাল চেক।
+   Tarbiyah Login Master Script
+   Features: Email Login, Phone OTP, and Role Selection.
 */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// ১. ফায়ারবেস কনফিগারেশন
 const firebaseConfig = {
     apiKey: "AIzaSyByrLkl4953IvCNyVD7jXWUAvj-9AWfD10", 
     authDomain: "tarbiyah-a27d3.firebaseapp.com",
@@ -22,62 +22,33 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// ২. ইমেইল ও পাসওয়ার্ড লগইন
 const loginForm = document.getElementById('login-form');
-
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
         const pass = document.getElementById('login-pass').value;
-        const submitBtn = loginForm.querySelector('button');
-
-        submitBtn.innerText = "Checking...";
-        submitBtn.disabled = true;
-
         try {
-            // ১. ফায়ারবেস অথেনটিকেশন চেক
             const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-            const user = userCredential.user;
-
-            // ২. ফায়ারস্টোর থেকে ইউজারের এক্সেস স্ট্যাটাস চেক
-            const userRef = doc(db, "Users", user.uid);
-            const userSnap = await getDoc(userRef);
-
-            if (userSnap.exists()) {
-                const userData = userSnap.data();
-                if (userData.status === "Approved") {
-                    alert("Welcome back, " + userData.name + "!");
-                    window.location.href = "dashboard.html";
-                } else {
-                    alert("Your account is still PENDING. Please contact Admin after payment.");
-                    await auth.signOut(); // অ্যাপ্রুভ না থাকলে লগআউট করে দিবে
-                }
-            } else {
-                alert("User record not found in database.");
-                await auth.signOut();
-            }
+            await checkUserRole(userCredential.user);
         } catch (error) {
-            console.error(error);
             alert("Login Failed: Incorrect email or password.");
-        } finally {
-            submitBtn.innerText = "Login";
-            submitBtn.disabled = false;
         }
     });
 }
 
-const auth = getAuth(app);
+// ৩. ফোন লগইন সেটাআপ (Recaptcha)
+if(document.getElementById('recaptcha-container')) {
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+}
 
-// ১. Recaptcha সেটাআপ
-window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-    'size': 'invisible'
-});
-
-// ২. ওটিপি পাঠানো
+// ওটিপি পাঠানো
 document.getElementById('send-otp-btn')?.addEventListener('click', () => {
     const phoneNumber = document.getElementById('phone-number').value;
+    if(!phoneNumber) return alert("Please enter phone number!");
+    
     const appVerifier = window.recaptchaVerifier;
-
     signInWithPhoneNumber(auth, phoneNumber, appVerifier)
         .then((confirmationResult) => {
             window.confirmationResult = confirmationResult;
@@ -86,38 +57,54 @@ document.getElementById('send-otp-btn')?.addEventListener('click', () => {
         }).catch((error) => { alert("Error: " + error.message); });
 });
 
-// ৩. ওটিপি ভেরিফাই
+// ওটিপি ভেরিফাই
 document.getElementById('verify-otp-btn')?.addEventListener('click', () => {
     const code = document.getElementById('otp-code').value;
-    window.confirmationResult.confirm(code).then((result) => {
-        checkUserRole(result.user);
+    window.confirmationResult.confirm(code).then(async (result) => {
+        await checkUserRole(result.user);
     }).catch(() => { alert("Invalid OTP!"); });
 });
 
-// ৪. রোল চেক ফাংশন
+// ৪. রোল চেক ও প্রোফাইল নেভিগেশন
 async function checkUserRole(user) {
     const userDoc = await getDoc(doc(db, "Users", user.uid));
-    if (userDoc.exists() && userDoc.data().role) {
-        window.location.href = "dashboard.html";
+    
+    if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.role) {
+            window.location.href = "dashboard.html";
+        } else {
+            // যদি রোল না থাকে (নতুন ইউজার), পপআপ দেখাবে
+            document.getElementById('role-modal').classList.remove('hidden');
+            window.tempUserUid = user.uid;
+        }
     } else {
-        // রোল না থাকলে পপআপ দেখাবে
+        // ডাটাবেসে তথ্য না থাকলেও পপআপ দেখাবে
         document.getElementById('role-modal').classList.remove('hidden');
-        window.tempUser = user;
+        window.tempUserUid = user.uid;
     }
 }
 
-// ৫. রোল সেট করা
+// ৫. রোল সেট করা (পপআপ থেকে কল হবে)
 window.setRole = async (role) => {
-    const user = window.tempUser || auth.currentUser;
-    await setDoc(doc(db, "Users", user.uid), {
-        uid: user.uid,
-        email: user.email || "",
-        phone: user.phoneNumber || "",
-        role: role,
-        status: "Active",
-        createdAt: new Date()
-    }, { merge: true });
+    const uid = window.tempUserUid || auth.currentUser.uid;
+    const user = auth.currentUser;
 
-    alert("Role set as " + role);
-    window.location.href = "dashboard.html";
+    try {
+        await setDoc(doc(db, "Users", uid), {
+            name: user.displayName || "New Student",
+            email: user.email || "",
+            phone: user.phoneNumber || "",
+            role: role,
+            status: "Active",
+            onboardingCompleted: false, // যাতে পরে অনবোর্ডিং পপআপ আসে
+            myCourses: [],
+            createdAt: new Date()
+        }, { merge: true });
+
+        alert("Welcome! Joining as a " + role);
+        window.location.href = "dashboard.html";
+    } catch (e) {
+        alert("Error setting role. Try again.");
+    }
 };

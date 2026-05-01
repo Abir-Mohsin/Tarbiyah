@@ -64,6 +64,7 @@
                     <i class="fas fa-graduation-cap"></i> LMS Settings <i class="fas fa-chevron-down"></i>
                     <ul class="sub-menu">
                         <li id="tab-manage-courses">Create Course</li>
+                        <li id="tab-manage-quiz"><i class="fas fa-question-circle"></i> Manage Quizzes</li>
                         <li id="tab-add-video">Manage Videos</li>
                         <li id="tab-manage-teachers">Faculty List</li>
                     </ul>
@@ -157,6 +158,27 @@
                     <button type="submit" class="btn">Publish Course</button>
                 </form>
             </div>
+<!-- Manage Quizzes View -->
+            <div id="manage-quiz-view" class="admin-card hidden">
+    <h3>Create Course Quiz</h3>
+    <form id="quiz-create-form" class="form-container" style="max-width: 100%;">
+        <div class="grid">
+            <select id="q-course-tag" required>
+                <option value="Arabic">Arabic</option>
+                <option value="Dawah">Dawah</option>
+                <option value="Psychology">Psychology</option>
+            </select>
+            <input type="text" id="q-question" placeholder="Enter Question" required>
+        </div>
+        <div class="grid" style="margin-top: 10px;">
+            <input type="text" id="q-opt1" placeholder="Option 1" required>
+            <input type="text" id="q-opt2" placeholder="Option 2" required>
+            <input type="text" id="q-opt3" placeholder="Option 3" required>
+            <input type="text" id="q-correct" placeholder="Correct Answer (Exact Match)" required>
+        </div>
+        <button type="submit" class="btn" style="margin-top: 15px;">Add Question</button>
+    </form>
+</div>
 
             <!-- Video/Lesson Management -->
             <div id="add-video-view" class="admin-card hidden">

@@ -256,8 +256,10 @@ function applyLanguage() {
     const btn = document.getElementById('lang-switch');
     if(btn) btn.innerText = currentLang === 'en' ? 'বাং' : 'EN';
     
-    // উদাহরন স্বরূপ কিছু টেক্সট চেঞ্জ করা (আপনাকে সব পেজে ডাটা-কি সেট করতে হবে)
-    document.getElementById('site-search').placeholder = translations[currentLang].search_placeholder;
-    // এখানে আরও কন্টেন্ট অ্যাড করতে পারেন
+    // ফিক্স: আগে চেক করবে সার্চ বক্সটি এই পেজে আছে কি না
+    const searchInput = document.getElementById('site-search');
+    if (searchInput) {
+        searchInput.placeholder = translations[currentLang].search_placeholder;
+    }
 }
 applyLanguage();
