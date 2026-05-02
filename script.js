@@ -263,3 +263,16 @@ function applyLanguage() {
     }
 }
 applyLanguage();
+
+// --- Global Search Logic ---
+const searchForm = document.getElementById('global-search-form');
+if (searchForm) {
+    searchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const query = document.getElementById('site-search').value.trim();
+        if (query) {
+            // ইউজারকে কোর্স পেজে পাঠাবে এবং ইউআরএল এ সার্চ কিওয়ার্ড দিয়ে দিবে
+            window.location.href = `courses.html?q=${encodeURIComponent(query)}`;
+        }
+    });
+}

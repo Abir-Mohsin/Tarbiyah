@@ -271,6 +271,27 @@ window.deleteTeacher = async (id) => {
 window.openAssignModal = (uid) => {
     window.selectedUserUid = uid;
     document.getElementById('course-modal').classList.remove('hidden');
+    // admin.js এর কনফার্ম বাটন লজিক:
+document.getElementById('confirm-assign')?.addEventListener('click', async () => {
+    const assignType = document.getElementById('assign-type').value; // নতুন আইডি
+    const itemName = document.getElementById('select-course').value; // কোর্স বা বইয়ের নাম
+    
+    if (window.selectedUserUid) {
+        const userRef = doc(db, "Users", window.selectedUserUid);
+        const updateData = {};
+        
+        if (assignType === 'course') {
+            updateData.myCourses = arrayUnion(itemName);
+        } else {
+            updateData.myBooks = arrayUnion(itemName); // ইউজারের প্রোফাইলে বই যোগ হবে
+        }
+        
+        updateData.status = "Active";
+        await updateDoc(userRef, updateData);
+        alert("Success! Access granted.");
+        document.getElementById('course-modal').classList.add('hidden');
+    }
+});
 };
 
 document.getElementById('confirm-assign')?.addEventListener('click', async () => {
@@ -540,4 +561,22 @@ notifyForm?.addEventListener('submit', async (e) => {
         alert("Notification sent to all students!");
         notifyForm.reset();
     } catch (e) { alert("Error!"); }
+});
+
+document.getElementById('tab-manage-live')?.addEventListener('click', () => showSection('manage-live-view'));
+
+document.getElementById('live-class-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        await addDoc(collection(db, "LiveClasses"), {
+            title: document.getElementById('l-title').value,
+            date: document.getElementById('l-date').value,
+            time: document.getElementById('l-time').value,
+            link: document.getElementById('l-link').value,
+            targetCourse: document.getElementById('l-course').value,
+            createdAt: new Date()
+        });
+        alert("Live Class Scheduled Successfully!");
+        e.target.reset();
+    } catch (e) { alert("Error scheduling class."); }
 });

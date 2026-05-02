@@ -80,6 +80,7 @@
                         <li id="tab-manage-quiz"><i class="fas fa-question-circle"></i> Manage Quizzes</li>
                         <li id="tab-add-video">Manage Videos</li>
                         <li id="tab-manage-teachers">Faculty List</li>
+                        <li id="tab-manage-live"><i class="fas fa-video"></i> Live Classes</li>
                     </ul>
                 </li>
 
@@ -252,6 +253,23 @@
                     <button type="submit" class="btn" style="grid-column: span 2;">Add Lesson</button>
                 </form>
             </div>
+
+            <!-- Live Classes Management View -->
+<div id="manage-live-view" class="admin-card hidden">
+    <h3>Schedule a Live Class</h3>
+    <form id="live-class-form" class="grid">
+        <input type="text" id="l-title" placeholder="Class Topic / Title" required style="grid-column: span 2;">
+        <input type="date" id="l-date" required>
+        <input type="time" id="l-time" required>
+        <input type="text" id="l-link" placeholder="Zoom / Google Meet Link" required style="grid-column: span 2;">
+        <select id="l-course">
+            <option value="All">All Students</option>
+            <option value="Arabic">Arabic Students</option>
+            <option value="Dawah">Dawah Students</option>
+        </select>
+        <button type="submit" class="btn">Schedule Class</button>
+    </form>
+</div>
 
             <!-- 9. Blog Management View -->
             <div id="manage-blogs-view" class="admin-card hidden">

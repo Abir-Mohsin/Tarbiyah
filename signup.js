@@ -78,88 +78,121 @@ onAuthStateChanged(auth, (user) => {
 });
 
 
-// ৬. নোটিফিকেশন পপআপ লজিক (যা আপনার ফাইলে মিসিং ছিল)
+// ৬. নোটিফিকেশন পপআপ লজিক (Fixed & Professional)
 function syncNotifications() {
-    const badge = document.querySelector('.notify-badge');
-    const bell = document.querySelector('.notification-bell');
+    let latestMessage = "No new announcements at the moment.";
 
-    // পপআপ HTML বডিতে যুক্ত করা (যদি আগে না থাকে)
+    // ১. পপআপ HTML বডিতে যুক্ত করা (যদি আগে না থাকে)
     if (!document.getElementById('notice-modal')) {
         const modalHtml = `
         <div id="notice-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; justify-content:center; align-items:center;">
             <div style="background:var(--card-bg); padding:30px; border-radius:10px; max-width:400px; text-align:center; border-top: 4px solid var(--soft-gold); box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-                <h3 style="color:var(--primary-green); margin-bottom:15px;"><i class="fas fa-bell"></i> New Announcement</h3>
-                <p id="notice-text" style="color:var(--text-dark); font-size:1.1rem; margin-bottom:25px; line-height:1.6;"></p>
+                <h3 style="color:var(--primary-green); margin-bottom:15px;"><i class="fas fa-bell"></i> Announcement</h3>
+                <p id="notice-text" style="color:var(--text-dark); font-size:1.1rem; margin-bottom:25px; line-height:1.6;">No new announcements at the moment.</p>
                 <button id="close-notice" class="btn" style="width:100%;">Mark as Read & Close</button>
             </div>
         </div>`;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
-    // ফায়ারবেস থেকে রিয়েল-টাইম নোটিশ শোনা
+    // ২. ফায়ারবেস থেকে রিয়েল-টাইম নোটিশ শোনা
     onSnapshot(doc(db, "Settings", "notification"), (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
-            if (badge) { badge.innerText = "1"; badge.style.background = "red"; }
+            latestMessage = data.message || "No new announcements.";
             
-            // বেল আইকনে ক্লিক করলে পপআপ আসবে
-            if (bell) {
-                bell.onclick = (e) => {
-                    e.preventDefault();
-                    document.getElementById('notice-text').innerText = data.message;
-                    document.getElementById('notice-modal').classList.remove('hidden');
-                    if (badge) { badge.innerText = "0"; badge.style.background = "gray"; }
-                };
+            // নতুন মেসেজ আসলে ব্যাজ "1" হয়ে যাবে
+            const badge = document.querySelector('.notify-badge');
+            if (badge) { 
+                badge.innerText = "1"; 
+                badge.style.background = "red"; 
             }
         }
     });
 
-    // পপআপ ক্লোজ করা
+    // ৩. গ্লোবাল ক্লিক লিসেনার (যেকোনো পেজে কাজ করবে)
     document.body.addEventListener('click', (e) => {
+        // বেল আইকনে ক্লিক করলে পপআপ ওপেন হবে
+        const bellClicked = e.target.closest('.notification-bell');
+        if (bellClicked) {
+            e.preventDefault();
+            document.getElementById('notice-text').innerText = latestMessage;
+            document.getElementById('notice-modal').classList.remove('hidden');
+            
+            // মেসেজ পড়ার পর ব্যাজ "0" হয়ে যাবে
+            const badge = document.querySelector('.notify-badge');
+            if (badge) { 
+                badge.innerText = "0"; 
+                badge.style.background = "gray"; 
+            }
+        }
+
+        // পপআপ ক্লোজ বাটন
         if (e.target.id === 'close-notice') {
             document.getElementById('notice-modal').classList.add('hidden');
         }
     });
 }
-syncNotifications(); // ফাংশনটি চালু করা হলো
+// --- ১০০% কার্যকরী গ্লোবাল নোটিফিকেশন লজিক ---
 
+window.latestNoticeMsg = "No new announcements at the moment.";
 
-// ৭. ডাইনামিক থিম ইঞ্জিন (লোগো, ফন্ট ও কালার পরিবর্তন)
-function applyDynamicTheme() {
-    onSnapshot(doc(db, "Settings", "theme"), (docSnap) => {
+function initNoticeModal() {
+    // ১. পপআপ HTML বডিতে যুক্ত করা
+    if (!document.getElementById('notice-modal')) {
+        const modalHtml = `
+        <div id="notice-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999999; display:flex; justify-content:center; align-items:center;">
+            <div style="background:var(--card-bg); padding:30px; border-radius:10px; max-width:400px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border-top: 4px solid red;">
+                <h3 style="color:var(--primary-green); margin-bottom:15px;"><i class="fas fa-bullhorn"></i> Announcement</h3>
+                <p id="notice-text" style="color:var(--text-dark); font-size:1.1rem; margin-bottom:25px; line-height:1.6;">Loading...</p>
+                <button onclick="closeNotice()" class="btn" style="width:100%;">Mark as Read & Close</button>
+            </div>
+        </div>`;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    // ২. ফায়ারবেস থেকে রিয়েল-টাইম নোটিশ শোনা
+    onSnapshot(doc(db, "Settings", "notification"), (docSnap) => {
         if (docSnap.exists()) {
-            const theme = docSnap.data();
-
-            if(theme.primaryColor) document.documentElement.style.setProperty('--primary-green', theme.primaryColor);
-            if(theme.accentColor) document.documentElement.style.setProperty('--soft-gold', theme.accentColor);
-
-            const logoContainers = document.querySelectorAll('.logo a, .logo');
-            logoContainers.forEach(container => {
-                if (theme.logoImg) {
-                    container.innerHTML = `<img src="${theme.logoImg}" alt="${theme.siteName}" style="max-height: 50px;">`;
-                } else {
-                    container.innerHTML = `<h1>${theme.siteName}</h1>`;
-                }
+            window.latestNoticeMsg = docSnap.data().message;
+            
+            // সব পেজের ব্যাজ লাল করে "1" করে দেওয়া
+            const badges = document.querySelectorAll('.notify-badge');
+            badges.forEach(b => { 
+                b.innerText = "1"; 
+                b.style.background = "red"; 
             });
-
-            if(theme.siteName) document.title = theme.siteName + " | Education Platform";
-
-            if (theme.fontUrl) {
-                let fontLink = document.getElementById('dynamic-font');
-                if (!fontLink) {
-                    fontLink = document.createElement('link');
-                    fontLink.id = 'dynamic-font';
-                    fontLink.rel = 'stylesheet';
-                    document.head.appendChild(fontLink);
-                }
-                fontLink.href = theme.fontUrl;
-                const fontNameMatch = theme.fontUrl.match(/family=([^&:]+)/);
-                if(fontNameMatch) document.body.style.fontFamily = `'${fontNameMatch[1].replace(/\+/g, ' ')}', sans-serif`;
-            }
         }
     });
 }
-applyDynamicTheme(); // ফাংশনটি চালু করা হলো
+
+// ৩. পপআপ ওপেন করার ফাংশন (HTML থেকে কল হবে)
+window.openNotice = function(e) {
+    if(e) e.preventDefault();
+    const modal = document.getElementById('notice-modal');
+    const textObj = document.getElementById('notice-text');
+    
+    if(modal && textObj) {
+        textObj.innerText = window.latestNoticeMsg;
+        modal.classList.remove('hidden');
+        
+        // মেসেজ দেখার পর ব্যাজ ধূসর করে "0" করে দেওয়া
+        const badges = document.querySelectorAll('.notify-badge');
+        badges.forEach(b => { 
+            b.innerText = "0"; 
+            b.style.background = "gray"; 
+        });
+    }
+};
+
+// ৪. পপআপ ক্লোজ করার ফাংশন
+window.closeNotice = function() {
+    const modal = document.getElementById('notice-modal');
+    if(modal) modal.classList.add('hidden');
+};
+
+// ফাংশন চালু করা
+initNoticeModal();
 
 
 // ৮. ভাষা পরিবর্তন (Language Switcher)
@@ -230,4 +263,17 @@ if (contactForm) {
         } catch (error) { alert('Error sending message.'); } 
         finally { submitBtn.innerText = "Send Message"; submitBtn.disabled = false; }
     });
+}
+
+// ইউআরএল থেকে বইয়ের তথ্য চেক করা
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('type') === 'book') {
+    const bookTitle = urlParams.get('title');
+    const bookPrice = urlParams.get('price');
+    
+    // কোর্সের ড্রপডাউনে বইয়ের নাম যোগ করা বা মেসেজ দেওয়া
+    const courseSelect = document.getElementById('course');
+    if (courseSelect) {
+        courseSelect.innerHTML = `<option value="${bookTitle}" selected>Buying Book: ${bookTitle} (${bookPrice} BDT)</option>`;
+    }
 }

@@ -1,8 +1,9 @@
 /* 
-   ================================================================
-   TARBIYAH MASTER DASHBOARD SCRIPT
-   সবগুলো ফিচার (Onboarding, Course, Quiz, Certificate) এখানে আছে।
-   ================================================================
+   ========================================================
+   Tarbiyah Master Dashboard Script (dashboard.js)
+   Features: Onboarding, Tabs, Video Player, Quiz, 
+   Certificates, Live Classes & Progress.
+   ========================================================
 */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -11,7 +12,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// ১. ফায়ারবেস কনফিগারেশন (আপনার দেওয়া অরিজিনাল কী)
+// ১. ফায়ারবেস কনফিগারেশন
 const firebaseConfig = {
     apiKey: "AIzaSyByrLkl4953IvCNyVD7jXWUAvj-9AWfD10", 
     authDomain: "tarbiyah-a27d3.firebaseapp.com",
@@ -26,17 +27,13 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// --- গ্লোবাল ভেরিয়েবলসমূহ ---
+// গ্লোবাল স্টেট
 let currentVideoId = "";
 let currentCourseVideos = [];
 let completedVideos = JSON.parse(localStorage.getItem('completedVideos')) || [];
 let currentUserRef = null;
 
-/* 
-   ২. ইউজার লগইন স্টেট চেক (এই অংশটি ড্যাশবোর্ডের মেইন গেট)
-   - ইউজার লগইন না থাকলে login.html এ পাঠাবে।
-   - ইউজার নতুন হলে অনবোর্ডিং পপআপ দেখাবে।
-*/
+// ২. অথেনটিকেশন এবং মেইন লোডার
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUserRef = doc(db, "Users", user.uid);
@@ -46,13 +43,19 @@ onAuthStateChanged(auth, async (user) => {
             const userData = userDoc.data();
             document.getElementById('student-name').innerText = userData.name || "Student";
             
-            // যদি অনবোর্ডিং বাকি থাকে (নতুন ইউজার)
             if (userData.onboardingCompleted === false) {
                 document.getElementById('onboarding-modal').classList.remove('hidden');
-                initOnboarding(); // অনবোর্ডিং শুরু করো
+                setupOnboarding();
             } else {
-                // পুরাতন ইউজার হলে ড্যাশবোর্ড ডাটা লোড করো
-                loadDashboardData(userData);
+                loadStudentDashboard(userData);
+                // onAuthStateChanged এর ভেতরে userData পাওয়ার পর এটি যোগ করুন
+if (userData.profilePic) {
+    const headerPic = document.getElementById('header-user-pic');
+    if (headerPic) headerPic.src = userData.profilePic;
+}
+// পেজ লোড হওয়ার সাথে সাথেই প্রোফাইল সেকশন রেডি করে রাখা
+setupProfileManagement(userData);
+                loadLiveClasses(userData);
             }
         }
     } else {
@@ -60,117 +63,125 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-/* 
-   ৩. অনবোর্ডিং সেকশন (কিওয়ার্ড সিলেকশন)
-   ইউজার প্রথমবার আসার পর এই লজিকটি চলবে।
-*/
-function initOnboarding() {
-    let selectedKeywords = [];
-    document.querySelectorAll('.keyword-badge').forEach(badge => {
-        badge.onclick = () => {
-            const val = badge.getAttribute('data-val');
-            if (selectedKeywords.includes(val)) {
-                selectedKeywords = selectedKeywords.filter(k => k !== val);
-                badge.classList.remove('selected');
-            } else {
-                selectedKeywords.push(val);
-                badge.classList.add('selected');
-            }
-        };
+// ৩. ট্যাব সুইচিং লজিক (Updated with Report & Profile)
+document.querySelectorAll('.dash-tab').forEach(tab => {
+    tab.addEventListener('click', async () => { // async যোগ করা হয়েছে ডাটা আনার জন্য
+        const target = tab.getAttribute('data-target');
+
+        // সব ট্যাব থেকে active ক্লাস সরানো
+        document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+        // সব সেকশন হাইড করা
+        document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
+
+        // ক্লিক করা ট্যাব এবং সেকশনকে একটিভ করা
+        tab.classList.add('active');
+        const activeSection = document.getElementById(target);
+        if (activeSection) activeSection.classList.add('active');
+
+        // --- নির্দিষ্ট ট্যাবের জন্য ডাটা লোড করা ---
+        
+        // ১. কুইজ ড্যাশবোর্ড
+        if (target === 'tab-quiz') loadQuizDashboard();
+        
+        // ২. সার্টিফিকেট ড্যাশবোর্ড
+        if (target === 'tab-certificates') loadCertificateDashboard();
+        
+        // ৩. এক্সপ্লোর বা নতুন কোর্স
+        if (target === 'tab-explore') {
+             const docSnap = await getDoc(currentUserRef);
+             loadExploreCourses(docSnap.data().interests || []);
+        }
+
+        // ৪. লার্নিং রিপোর্ট (নতুন যুক্ত হলো)
+        if (target === 'tab-report') {
+            const docSnap = await getDoc(currentUserRef);
+            loadLearningReport(docSnap.data()); // এটি গ্রাফ লোড করবে
+        }
+
+        // ৫. প্রোফাইল ম্যানেজমেন্ট (নতুন যুক্ত হলো)
+        if (target === 'tab-profile') {
+            const docSnap = await getDoc(currentUserRef);
+            setupProfileManagement(docSnap.data()); // এটি প্রোফাইল ফর্ম সেটআপ করবে
+        }
     });
+});
 
-    document.getElementById('complete-onboarding-btn').onclick = async () => {
-        const pic = document.getElementById('ob-profile-pic').value;
-        if (selectedKeywords.length === 0) return alert("পছন্দের অন্তত একটি বিষয় সিলেক্ট করুন।");
-
-        try {
-            await updateDoc(currentUserRef, {
-                profilePic: pic,
-                interests: selectedKeywords,
-                onboardingCompleted: true
-            });
-            location.reload(); // ডাটা আপডেট করে পেজ রিফ্রেশ
-        } catch (e) { alert("সেভ করতে সমস্যা হয়েছে!"); }
-    };
-}
-
-/* 
-   ৪. ড্যাশবোর্ড ডাটা লোড (Stats, Course, Explore)
-*/
-async function loadDashboardData(userData) {
-    // উপরের স্ট্যাটাস বক্স আপডেট
+// ৪. স্টুডেন্ট ড্যাশবোর্ড ডাটা (Stats)
+async function loadStudentDashboard(userData) {
     document.getElementById('stat-courses').innerText = userData.myCourses ? userData.myCourses.length : 0;
     document.getElementById('stat-books').innerText = userData.myBooks ? userData.myBooks.length : 0;
-
-    // ১. আপনার কেনা কোর্সগুলো দেখাও
-    renderMyCourses(userData.myCourses || []);
-
-    // ২. এক্সপ্লোর ট্যাবে আপনার পছন্দের কোর্সগুলো দেখাও
-    renderExploreList(userData.interests || []);
+    renderEnrolledCourses(userData.myCourses || []);
+    // dashboard.js এর ভেতরে renderMyBooks নামে নতুন ফাংশন
+async function renderMyBooks(bookList) {
+    const booksArea = document.getElementById('tab-report'); // আপাতত রিপোর্টের নিচে বা আলাদা ট্যাবে দিতে পারেন
+    // যদি আপনি আলাদা ট্যাব 'tab-books' বানিয়ে থাকেন তবে সেখানে দিবেন।
+    
+    if (!bookList || bookList.length === 0) return;
+    
+    let html = `<h3>My Library (Enrolled Books)</h3><div class="grid">`;
+    
+    // ফায়ারস্টোর থেকে বইয়ের লিঙ্কগুলো আনতে হবে
+    const snap = await getDocs(collection(db, "Books"));
+    snap.forEach(doc => {
+        const b = doc.data();
+        if (bookList.includes(b.title)) {
+            html += `
+                <div class="card">
+                    <img src="${b.image}" width="100">
+                    <h3>${b.title}</h3>
+                    <button class="btn" onclick="window.openPdfReader('${b.title}', '${b.pdf}')">Read Now</button>
+                </div>`;
+        }
+    });
+    html += `</div><br><hr><br>`;
+    
+    // এটি ড্যাশবোর্ডের শুরুতে যোগ করে দিবে
+    const learningTab = document.getElementById('tab-learning');
+    learningTab.insertAdjacentHTML('afterbegin', html);
 }
 
-// কেনা কোর্সের লিস্ট
-function renderMyCourses(courses) {
+// loadStudentDashboard ফাংশনের ভেতরে এটি কল করুন:
+// renderMyBooks(userData.myBooks || []);
+}
+
+// ৫. কেনা কোর্সের তালিকা রেন্ডার
+function renderEnrolledCourses(courses) {
     const listArea = document.getElementById('enrolled-courses-list');
+    if (!listArea) return;
     if (courses.length === 0) {
-        listArea.innerHTML = "<p>এখনো কোনো কোর্স এনরোল করা হয়নি।</p>";
+        listArea.innerHTML = "<p>You haven't enrolled in any courses yet.</p>";
         return;
     }
     listArea.innerHTML = "";
-    courses.forEach(cName => {
+    courses.forEach(courseName => {
         listArea.innerHTML += `
             <div class="card">
-                <h3>${cName}</h3>
-                <button class="btn" onclick="startCourse('${cName}')">পড়াশোনা শুরু করুন</button>
+                <h3>${courseName}</h3>
+                <button class="btn" onclick="startCourse('${courseName}')" style="margin-top:10px;">Continue Lesson</button>
             </div>`;
     });
 }
 
-// এক্সপ্লোর বা নতুন কোর্স সাজেস্ট করা
-async function renderExploreList(userInterests) {
-    const exploreList = document.getElementById('explore-courses-list');
-    if(!exploreList) return;
-    
-    const snap = await getDocs(collection(db, "Courses"));
-    exploreList.innerHTML = "";
-    
-    snap.forEach(doc => {
-        const course = doc.data();
-        const isRecommended = userInterests.includes(course.tag);
-        exploreList.innerHTML += `
-            <div class="card" style="${isRecommended ? 'border: 2px solid var(--soft-gold);' : ''}">
-                ${isRecommended ? '<small style="color:var(--soft-gold)">আপনার পছন্দের বিষয়</small>' : ''}
-                <img src="${course.image}" style="width:100%; height:150px; object-fit:cover; border-radius:10px;">
-                <h3>${course.title}</h3>
-                <p>দাম: ${course.price == 0 ? 'FREE' : course.price + ' BDT'}</p>
-                <a href="admission.html" class="btn" style="margin-top:10px;">এনরোল করুন</a>
-            </div>`;
-    });
-}
-
-/* 
-   ৫. ভিডিও প্লেয়ার সেকশন (Start Learning)
-*/
+// ৬. ভিডিও প্লেয়ার লজিক
 window.startCourse = async (courseName) => {
-    document.getElementById('course-selection').style.display = "none";
+    document.getElementById('enrolled-courses-list').parentElement.classList.add('hidden');
     document.getElementById('learning-area').classList.remove('hidden');
     document.getElementById('course-title').innerText = courseName;
 
     const q = query(collection(db, "Videos"), where("course", "==", courseName), orderBy("order", "asc"));
     const snap = await getDocs(q);
-    
     currentCourseVideos = [];
     snap.forEach(doc => currentCourseVideos.push({ id: doc.id, ...doc.data() }));
 
     if (currentCourseVideos.length > 0) {
-        updatePlaylist();
-        loadVideo(currentCourseVideos[0]); // প্রথম ভিডিও প্লে করো
+        renderPlaylist();
+        playVideo(currentCourseVideos[0]);
     } else {
-        alert("এই কোর্সে কোনো ভিডিও পাওয়া যায়নি।");
+        alert("No lessons found.");
     }
 };
 
-function updatePlaylist() {
+function renderPlaylist() {
     const list = document.getElementById('video-list');
     list.innerHTML = "";
     currentCourseVideos.forEach(v => {
@@ -178,177 +189,246 @@ function updatePlaylist() {
         const div = document.createElement('div');
         div.className = `playlist-item ${v.id === currentVideoId ? 'active' : ''}`;
         div.innerHTML = `<span>${v.title}</span> <span>${isDone}</span>`;
-        div.onclick = () => loadVideo(v);
+        div.onclick = () => playVideo(v);
         list.appendChild(div);
     });
-    updateProgressBar();
+    updateProgress();
 }
 
-function loadVideo(v) {
-    currentVideoId = v.id;
-    document.getElementById('video-frame').src = v.url;
-    updatePlaylist();
+function playVideo(video) {
+    currentVideoId = video.id;
+    document.getElementById('video-frame').src = video.url;
+    renderPlaylist();
     loadComments();
 }
 
-function updateProgressBar() {
+function updateProgress() {
     const total = currentCourseVideos.length;
     const done = currentCourseVideos.filter(v => completedVideos.includes(v.id)).length;
     const percent = total > 0 ? Math.round((done / total) * 100) : 0;
     const bar = document.getElementById('progress-bar');
-    if(bar) { bar.style.width = percent + "%"; bar.innerText = percent + "% সম্পন্ন"; }
+    if (bar) { bar.style.width = percent + "%"; bar.innerText = percent + "% Progress"; }
 }
 
-document.getElementById('mark-complete-btn').onclick = async () => {
+document.getElementById('mark-complete-btn')?.addEventListener('click', async () => {
     if (currentVideoId && !completedVideos.includes(currentVideoId)) {
         completedVideos.push(currentVideoId);
         localStorage.setItem('completedVideos', JSON.stringify(completedVideos));
-        
-        // ডাটাবেসে প্রগ্রেস সেভ করো
         await updateDoc(currentUserRef, { completedLessons: completedVideos });
-        updatePlaylist();
+        renderPlaylist();
     }
-};
+});
 
-/* 
-   ৬. কুইজ এবং সার্টিফিকেট সেকশন
-*/
+// ৭. কুইজ ড্যাশবোর্ড লজিক
 async function loadQuizDashboard() {
-    const area = document.getElementById('quiz-area');
-    const userSnap = await getDoc(currentUserRef);
-    const myCourses = userSnap.data().myCourses || [];
+    const quizArea = document.getElementById('quiz-area');
+    quizArea.innerHTML = "Loading...";
+    const userDoc = await getDoc(currentUserRef);
+    const myCourses = userDoc.data().myCourses || [];
 
-    if(myCourses.length === 0) { area.innerHTML = "আগে কোনো কোর্সে ভর্তি হন।"; return; }
+    if (myCourses.length === 0) {
+        quizArea.innerHTML = "<p>Enroll in a course first.</p>";
+        return;
+    }
 
-    area.innerHTML = "<h4>কুইজ শুরু করতে কোর্স সিলেক্ট করুন:</h4><br>";
+    quizArea.innerHTML = "<h4>Select course for Exam:</h4><br>";
     myCourses.forEach(c => {
-        area.innerHTML += `<button class="btn" style="margin:5px;" onclick="window.startExam('${c}')">${c} কুইজ দিন</button>`;
+        const btn = document.createElement('button');
+        btn.className = "btn"; btn.style.margin = "5px";
+        btn.innerText = `Start ${c} Quiz`;
+        btn.onclick = () => runExam(c);
+        quizArea.appendChild(btn);
     });
 }
 
-window.startExam = async (courseTag) => {
-    const area = document.getElementById('quiz-area');
-    area.innerHTML = "লোড হচ্ছে...";
-    const snap = await getDocs(query(collection(db, "Quizzes"), where("course", "==", courseTag)));
-    
-    if(snap.empty) { area.innerHTML = "এই কোর্সের জন্য কোনো কুইজ নেই।"; return; }
+async function runExam(courseTag) {
+    const quizArea = document.getElementById('quiz-area');
+    const q = query(collection(db, "Quizzes"), where("course", "==", courseTag));
+    const snap = await getDocs(q);
+
+    if (snap.empty) { quizArea.innerHTML = "No quiz for this course."; return; }
 
     let questions = [];
-    let html = `<form id="exam-form">`;
+    let html = `<form id="active-quiz">`;
     snap.forEach(doc => {
-        const q = doc.data();
-        questions.push({id: doc.id, ...q});
-        html += `<div style="background:#f4f4f4; padding:15px; margin-bottom:10px; border-radius:10px;">
-                    <p><strong>${q.question}</strong></p>
-                    ${q.options.map(opt => `<label style="display:block;"><input type="radio" name="${doc.id}" value="${opt}" required> ${opt}</label>`).join('')}
-                 </div>`;
+        const data = doc.data();
+        questions.push({ id: doc.id, ...data });
+        html += `<div class="admin-card" style="margin-bottom:10px;">
+            <p><strong>${data.question}</strong></p>
+            ${data.options.map(o => `<label style="display:block;"><input type="radio" name="${doc.id}" value="${o}" required> ${o}</label>`).join('')}
+        </div>`;
     });
-    html += `<button type="submit" class="btn">সাবমিট করুন</button></form>`;
-    area.innerHTML = html;
+    html += `<button type="submit" class="btn">Submit</button></form>`;
+    quizArea.innerHTML = html;
 
-    document.getElementById('exam-form').onsubmit = async (e) => {
+    document.getElementById('active-quiz').onsubmit = async (e) => {
         e.preventDefault();
-        const data = new FormData(e.target);
+        const fd = new FormData(e.target);
         let correct = 0;
-        questions.forEach(q => { if(data.get(q.id) === q.correctAnswer) correct++; });
+        questions.forEach(q => { if (fd.get(q.id) === q.correctAnswer) correct++; });
         const score = Math.round((correct / questions.length) * 100);
 
-        if(score >= 80) {
-            alert(`মাশাআল্লাহ! আপনি ${score}% নম্বর পেয়ে পাস করেছেন। সার্টিফিকেট আনলক হয়েছে।`);
+        if (score >= 80) {
+            alert("Passed! Certificate Unlocked.");
             await updateDoc(currentUserRef, { certificates: arrayUnion(courseTag) });
             loadCertificateDashboard();
         } else {
-            alert(`আবার চেষ্টা করুন! আপনার স্কোর: ${score}%। পাসের জন্য ৮০% প্রয়োজন।`);
+            alert(`Score: ${score}%. Need 80% to pass.`);
         }
     };
-};
+}
 
+// ৮. সার্টিফিকেট ড্যাশবোর্ড লজিক
 async function loadCertificateDashboard() {
-    const area = document.getElementById('certificate-list');
-    const userSnap = await getDoc(currentUserRef);
-    const earned = userSnap.data().certificates || [];
-    
-    area.innerHTML = earned.length === 0 ? "আপনি এখনো কোনো সার্টিফিকেট পাননি।" : "";
+    const certArea = document.getElementById('certificate-list');
+    certArea.innerHTML = "Loading...";
+    const userDoc = await getDoc(currentUserRef);
+    const earned = userDoc.data().certificates || [];
+
+    certArea.innerHTML = earned.length === 0 ? "No certificates earned yet." : "";
     earned.forEach(cName => {
-        area.innerHTML += `
+        certArea.innerHTML += `
             <div class="card cert-card">
                 <i class="fas fa-award" style="font-size:3rem; color:gold;"></i>
                 <h3>${cName}</h3>
-                <button class="btn" onclick="downloadCertificate('${cName}', '${userSnap.data().name}')">ডাউনলোড PDF</button>
+                <button class="btn" onclick="downloadCertificate('${cName}', '${userDoc.data().name}')">Download PDF</button>
             </div>`;
     });
 }
 
-/* 
-   ৭. ইউটিলিটি ফাংশনসমূহ (PDF, Tabs, Logout)
-*/
+// ৯. সার্টিফিকেট PDF জেনারেটর
 window.downloadCertificate = (course, name) => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'landscape' });
     doc.setDrawColor(212, 175, 55); doc.setLineWidth(10); doc.rect(10, 10, 277, 190);
     doc.setFontSize(40); doc.text("Certificate of Completion", 148, 60, {align: "center"});
     doc.setFontSize(30); doc.text(name, 148, 110, {align: "center"});
-    doc.setFontSize(20); doc.text(`Completed Course: ${course}`, 148, 150, {align: "center"});
+    doc.setFontSize(20); doc.text(`Course: ${course}`, 148, 150, {align: "center"});
     doc.save(`${name}-Certificate.pdf`);
 };
 
-// ট্যাব সুইচিং
-document.querySelectorAll('.dash-tab').forEach(tab => {
-    tab.onclick = () => {
-        const target = tab.getAttribute('data-target');
-        document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
-        document.getElementById(target)?.classList.add('active');
-        
-        if(target === 'tab-quiz') loadQuizDashboard();
-        if(target === 'tab-certificates') loadCertificateDashboard();
-    };
-});
-
-// লগআউট
-document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => window.location.href = "login.html");
-
-// ভিডিও কমেন্ট লোড করার লজিক (সংক্ষেপিত)
-async function loadComments() {
-    const list = document.getElementById('comments-list');
-    if(!list) return;
-    const q = query(collection(db, "Comments"), where("videoId", "==", currentVideoId), orderBy("timestamp", "desc"));
-    const snap = await getDocs(q);
-    list.innerHTML = "";
+// ১০. অন্যান্য ফাংশন (Explore, Comments, Logout, Onboarding)
+async function loadExploreCourses(userInterests) {
+    const exploreList = document.getElementById('explore-courses-list');
+    const snap = await getDocs(collection(db, "Courses"));
+    exploreList.innerHTML = "";
     snap.forEach(doc => {
         const c = doc.data();
-        list.innerHTML += `<div class="comment-item"><strong>${c.studentName}</strong>: ${c.text}</div>`;
+        const isRec = userInterests.includes(c.tag);
+        exploreList.innerHTML += `
+            <div class="card" style="${isRec ? 'border:2px solid gold' : ''}">
+                <img src="${c.image}" style="width:100%; height:150px; object-fit:cover; border-radius:10px;">
+                <h3>${c.title}</h3>
+                <a href="admission.html" class="btn">Enroll</a>
+            </div>`;
     });
 }
 
-document.getElementById('post-comment-btn').onclick = async () => {
-    const text = document.getElementById('comment-input').value;
-    if(!text || !currentVideoId) return;
-    await addDoc(collection(db, "Comments"), {
-        videoId: currentVideoId, text: text,
-        studentName: document.getElementById('student-name').innerText,
-        timestamp: new Date()
-    });
-    document.getElementById('comment-input').value = "";
-    loadComments();
-};
+// ৭. লাইভ ক্লাস লোডার (কাউন্টডাউন টাইমার সহ)
+async function loadLiveClasses(userData) {
+    const liveArea = document.getElementById('tab-live');
+    if(!liveArea) return;
 
-// লার্নিং রিপোর্ট গ্রাফ তৈরি (Chart.js)
+    try {
+        const q = query(collection(db, "LiveClasses"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        
+        let html = `<h3>Upcoming Live Sessions</h3><br><div class="grid">`;
+        let hasClass = false;
+
+        snap.forEach(doc => {
+            const data = doc.data();
+            if (data.targetCourse === "All" || (userData.myCourses && userData.myCourses.includes(data.targetCourse))) {
+                hasClass = true;
+                
+                // ডেট এবং টাইম মিলিয়ে টার্গেট সময় বের করা (কাউন্টডাউনের জন্য)
+                const targetDateTime = new Date(`${data.date}T${data.time}`).getTime();
+                const timerId = `timer-${doc.id}`;
+
+                html += `
+                    <div class="card" style="border-left: 4px solid red; text-align: left;">
+                        <span style="background: red; color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.8rem; font-weight: bold;">● LIVE CLASS</span>
+                        <h3 style="margin-top: 15px;">${data.title}</h3>
+                        <p style="color: #555; margin-bottom: 10px;">Scheduled for: ${data.date} at ${data.time}</p>
+                        
+                        <!-- টাইমার দেখানোর জায়গা -->
+                        <div style="background: #f4f4f4; padding: 10px; border-radius: 5px; text-align: center; margin-bottom: 15px;">
+                            <strong style="color: var(--primary-green); font-size: 1.2rem;" id="${timerId}">Loading timer...</strong>
+                        </div>
+                        
+                        <a href="${data.link}" target="_blank" class="btn" style="width: 100%;">Join Class Now</a>
+                    </div>`;
+
+                // টাইমার চালু করার ফাংশন
+                startCountdown(targetDateTime, timerId);
+            }
+        });
+        html += `</div>`;
+        if (hasClass) liveArea.innerHTML = html;
+    } catch (e) { console.log("Live class error"); }
+}
+
+// কাউন্টডাউন টাইমার ফাংশন (dashboard.js এর যেকোনো জায়গায় রাখুন)
+function startCountdown(targetTime, elementId) {
+    const x = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = targetTime - now;
+
+        if (distance < 0) {
+            clearInterval(x);
+            const el = document.getElementById(elementId);
+            if(el) el.innerHTML = "<span style='color:red;'>Class is LIVE right now!</span>";
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        const el = document.getElementById(elementId);
+        if(el) el.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }, 1000);
+}
+
+function setupOnboarding() {
+    let selected = [];
+    document.querySelectorAll('.keyword-badge').forEach(b => {
+        b.onclick = () => {
+            const v = b.getAttribute('data-val');
+            if(selected.includes(v)) selected = selected.filter(i => i !== v);
+            else selected.push(v);
+            b.classList.toggle('selected');
+        };
+    });
+    document.getElementById('complete-onboarding-btn').onclick = async () => {
+        await updateDoc(currentUserRef, { onboardingCompleted: true, interests: selected });
+        location.reload();
+    };
+}
+
+document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => window.location.href = "login.html");
+
+// --- ১১. লার্নিং রিপোর্ট গ্রাফ (Chart.js) ---
 function renderProgressChart(completedCount, totalCount) {
     const ctx = document.getElementById('progressChart')?.getContext('2d');
-    if(!ctx) return;
+    if (!ctx) return;
 
     // যদি আগে কোনো চার্ট থাকে তা ধ্বংস করে নতুনটা বানাবে
-    if(window.myChart) window.myChart.destroy();
+    if (window.myChart instanceof Chart) {
+        window.myChart.destroy();
+    }
+
+    const remaining = totalCount - completedCount;
+    const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
     window.myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Completed', 'Remaining'],
+            labels: ['Completed Lessons', 'Remaining'],
             datasets: [{
-                data: [completedCount, totalCount - completedCount],
-                backgroundColor: ['#D4AF37', '#eee'],
+                data: [completedCount, remaining > 0 ? remaining : 0],
+                backgroundColor: ['#D4AF37', '#e0e0e0'],
                 borderWidth: 0
             }]
         },
@@ -359,7 +439,129 @@ function renderProgressChart(completedCount, totalCount) {
             }
         }
     });
+
+    document.getElementById('report-text').innerText = `You have completed ${percentage}% of your enrolled lessons!`;
 }
 
-// আপনার loadStudentDashboard ফাংশনের ভেতর এটি কল করুন:
-// renderProgressChart(userData.completedLessons?.length || 0, 10); // ১০ এর জায়গায় আপনার মোট লেসন সংখ্যা হবে
+// রিপোর্ট ডাটা ক্যালকুলেট করার ফাংশন
+async function loadLearningReport(userData) {
+    const completedCount = userData.completedLessons ? userData.completedLessons.length : 0;
+    
+    // সব কোর্সের মোট ভিডিও সংখ্যা বের করা (সিম্পল লজিক)
+    // প্রফেশনাল করতে হলে সব কোর্সের ভিডিও কোয়েরি করে যোগ করতে হবে। 
+    // আপাতত আমরা স্টুডেন্টের কেনা কোর্সের ওপর ভিত্তি করে একটি আনুমানিক সংখ্যা দিচ্ছি।
+    const totalVideosPossible = (userData.myCourses ? userData.myCourses.length : 0) * 5; // প্রতি কোর্সে ৫টি ভিডিও ধরছি
+    
+    renderProgressChart(completedCount, totalVideosPossible || 1);
+}
+
+
+// --- ১২. প্রোফাইল ম্যানেজমেন্ট লজিক (উন্নত ও ফিক্সড) ---
+function setupProfileManagement(userData) {
+    const nameInp = document.getElementById('p-name');
+    const phoneInp = document.getElementById('p-phone');
+    const imgInp = document.getElementById('p-img');
+    const updateBtn = document.getElementById('update-profile-btn');
+
+    // ইনপুট ফিল্ডগুলোতে ডাটা বসানো
+    if(nameInp) nameInp.value = userData.name || "";
+    if(phoneInp) phoneInp.value = userData.phone || "";
+    if(imgInp) imgInp.value = userData.profilePic || "";
+
+    // বাটন ক্লিক লজিক
+    if (updateBtn) {
+        // আগের কোনো ইভেন্ট লিসেনার থাকলে তা সরিয়ে নতুনটা দেওয়া (Duplicate এড়াতে)
+        updateBtn.onclick = async (e) => {
+            e.preventDefault();
+            
+            const newName = nameInp.value.trim();
+            const newPhone = phoneInp.value.trim();
+            const newImg = imgInp.value.trim();
+
+            if (!newName) return alert("Name cannot be empty!");
+
+            updateBtn.innerText = "Updating...";
+            updateBtn.disabled = true;
+
+            try {
+                // ডাটাবেস আপডেট
+                await updateDoc(currentUserRef, {
+                    name: newName,
+                    phone: newPhone,
+                    profilePic: newImg
+                });
+
+                // হেডারের ছবি সাথে সাথে আপডেট করা
+                const headerPic = document.getElementById('header-user-pic');
+                if (headerPic && newImg) headerPic.src = newImg;
+                
+                // স্টুডেন্টের নাম ড্যাশবোর্ডে আপডেট করা
+                const dashName = document.getElementById('student-name');
+                if (dashName) dashName.innerText = newName;
+
+                alert("MashaAllah! Profile updated successfully.");
+            } catch (error) {
+                console.error("Update Error:", error);
+                alert("Failed to update profile. Please check console.");
+            } finally {
+                updateBtn.innerText = "Update Profile";
+                updateBtn.disabled = false;
+            }
+        };
+    }
+}
+
+// --- ১৩. মেইন ট্যাব সুইচিং লজিক আপডেট (আগেরটার সাথে মিলিয়ে নিন) ---
+// নিশ্চিত করুন ট্যাব লজিকে Report এবং Profile এর কলগুলো আছে:
+document.querySelectorAll('.dash-tab').forEach(tab => {
+    tab.addEventListener('click', async () => {
+        const target = tab.getAttribute('data-target');
+        // ... (আগের কোড) ...
+        
+        if (target === 'tab-report' || target === 'tab-profile') {
+            const userSnap = await getDoc(currentUserRef);
+            if(target === 'tab-report') loadLearningReport(userSnap.data());
+            if(target === 'tab-profile') setupProfileManagement(userSnap.data());
+        }
+    });
+});
+
+// উন্নত PDF Reader ফাংশন (Fix for Loading Issue)
+window.openPdfReader = (title, pdfUrl) => {
+    let embedUrl = pdfUrl;
+    
+    // গুগল ড্রাইভ লিঙ্ক চেক এবং কনভার্ট করা
+    if (pdfUrl.includes("drive.google.com")) {
+        try {
+            let fileId = "";
+            if (pdfUrl.includes("/d/")) {
+                fileId = pdfUrl.split("/d/")[1].split("/")[0];
+            } else if (pdfUrl.includes("id=")) {
+                fileId = pdfUrl.split("id=")[1].split("&")[0];
+            }
+            
+            if (fileId) {
+                // এটি গুগল ড্রাইভের অফিশিয়াল প্রিভিউ লিঙ্ক
+                embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+            }
+        } catch (e) {
+            console.error("Link conversion error:", e);
+        }
+    }
+
+    const iframe = document.getElementById('pdf-iframe');
+    const titleEl = document.getElementById('pdf-reader-title');
+    const modal = document.getElementById('pdf-reader-modal');
+
+    if (iframe && modal) {
+        titleEl.innerText = title;
+        iframe.src = embedUrl; // এখানে লিঙ্কটি বসানো হচ্ছে
+        modal.classList.remove('hidden');
+        document.body.style.overflow = "hidden"; // পেজ স্ক্রল বন্ধ
+
+        // একটি ছোট সতর্কতা: যদি অনেকক্ষণ লোড না হয়
+        iframe.onerror = function() {
+            alert("This PDF could not be loaded in the reader. Please make sure the Drive link is set to 'Public'.");
+        };
+    }
+};
