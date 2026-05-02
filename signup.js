@@ -63,3 +63,23 @@ if (signupForm) {
         }
     });
 }
+
+// নোটিফিকেশন সিঙ্কিং
+function syncNotifications() {
+    const badge = document.querySelector('.notify-badge');
+    const bell = document.querySelector('.notification-bell');
+
+    onSnapshot(doc(db, "Settings", "notification"), (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (badge) {
+                badge.innerText = "1"; // নতুন মেসেজ আসলে ১ দেখাবে
+                badge.style.display = "block";
+            }
+            if (bell) {
+                bell.onclick = () => alert("Announcement: " + data.message);
+            }
+        }
+    });
+}
+syncNotifications();

@@ -59,7 +59,7 @@ function startSliderAnimation() {
     }, 5000);
 }
 
-// ২. ভিডিও রিভিউ লোড করা
+// ২. ভিডিও রিভিউ লোড করা (উন্নত ভার্সন)
 async function loadVideoReviews() {
     const list = document.getElementById('video-reviews-list');
     if(!list) return;
@@ -75,10 +75,15 @@ async function loadVideoReviews() {
 
         snap.forEach(doc => {
             const rev = doc.data();
+            // লিঙ্ক থেকে আইডি বের করার লজিক (যদি পুরো লিঙ্ক দেওয়া হয়)
+            let videoId = rev.youtubeId;
+            if (videoId.includes('v=')) videoId = videoId.split('v=')[1].split('&')[0];
+            else if (videoId.includes('youtu.be/')) videoId = videoId.split('youtu.be/')[1].split('?')[0];
+
             list.innerHTML += `
                 <div class="video-card">
                     <div class="video-container">
-                        <iframe src="https://www.youtube.com/embed/${rev.youtubeId}" frameborder="0" allowfullscreen></iframe>
+                        <iframe src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </div>
                     <div class="video-info"><h4>${rev.name}</h4></div>
                 </div>`;

@@ -6,12 +6,18 @@
     <title>Tarbiyah | Master Admin OS</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <!-- FontAwesome for Icons (মেনুতে আইকন দেখানোর জন্য) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-MSF27WNX');</script>
+
     <style>
         .admin-wrapper { display: flex; min-height: 100vh; background: #f4f7f6; }
-        
-        /* Advanced Sidebar */
         aside { width: 260px; background: #1a1a2e; color: #fff; padding: 20px 0; height: 100vh; position: sticky; top: 0; overflow-y: auto; }
         .admin-logo { text-align: center; margin-bottom: 20px; padding: 0 20px; border-bottom: 1px solid #2f2f45; padding-bottom: 20px; }
         .admin-logo h2 { color: #e9c46a; font-size: 1.5rem; }
@@ -21,7 +27,6 @@
         .sidebar-links > li:hover, .sidebar-links > li.active { background: #2f2f45; border-left-color: #e9c46a; color: #fff; }
         .sidebar-links i { margin-right: 10px; width: 20px; text-align: center; }
         
-        /* Dropdown/Sub-menu */
         .sub-menu { display: none; background: #151525; padding-left: 40px; list-style: none; }
         .sub-menu li { padding: 10px 0; font-size: 0.9rem; cursor: pointer; color: #888; transition: 0.2s; }
         .sub-menu li:hover, .sub-menu li.active { color: #e9c46a; }
@@ -29,25 +34,22 @@
         .has-dropdown .fa-chevron-down { float: right; margin-top: 5px; transition: 0.3s; }
         .has-dropdown.open .fa-chevron-down { transform: rotate(180deg); }
 
-        /* Main Content */
-        .admin-main { flex: 1; padding: 30px; overflow-y: auto; }
+        .admin-main { flex: 1; padding: 30px; overflow-y: auto; width: 100%; }
         .admin-card { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .hidden { display: none !important; }
         
         #login-section { height: 100vh; display: flex; justify-content: center; align-items: center; background: #1B4332; width: 100%; position: fixed; z-index: 2000; top: 0; left: 0;}
+        
+        /* Analytics Fix */
+        .analytics-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .analytics-grid { grid-template-columns: 1fr; } }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-MSF27WNX');</script>
-<!-- End Google Tag Manager -->
 </head>
 <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MSF27WNX" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
-    <!-- Login Section -->
+    <!-- ১. লগইন সেকশন -->
     <div id="login-section">
         <div class="form-container" style="max-width: 350px; text-align: center;">
             <h2>Admin OS Login</h2><br>
@@ -57,16 +59,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
     </div>
 
-    <!-- Admin OS Layout -->
+    <!-- ২. অ্যাডমিন প্যানেল লেআউট -->
     <div class="admin-wrapper hidden" id="admin-dashboard-wrapper">
-        <!-- Sidebar -->
+        
+        <!-- সাইডবার -->
         <aside>
             <div class="admin-logo"><h2>Tarbiyah OS</h2></div>
             <ul class="sidebar-links">
                 <li id="tab-dashboard" class="active"><i class="fas fa-chart-pie"></i> Analytics Dashboard</li>
-                
                 <li id="tab-admissions"><i class="fas fa-user-plus"></i> Admissions</li>
                 <li id="tab-users"><i class="fas fa-users"></i> Student DB</li>
+                
+                <!-- নতুন মেসেজ ও নোটিশ ট্যাব -->
+                <li id="tab-messages"><i class="fas fa-envelope"></i> Comms & Notices</li>
                 
                 <li class="has-dropdown" onclick="toggleDropdown(this)">
                     <i class="fas fa-graduation-cap"></i> LMS Settings <i class="fas fa-chevron-down"></i>
@@ -78,7 +83,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </ul>
                 </li>
 
-                <!-- Publications Dropdown (আপনার আইডিয়া অনুযায়ী) -->
                 <li class="has-dropdown" onclick="toggleDropdown(this)">
                     <i class="fas fa-book-open"></i> Publications <i class="fas fa-chevron-down"></i>
                     <ul class="sub-menu">
@@ -87,89 +91,97 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         <li id="tab-manage-research">Manage Research</li>
                     </ul>
                 </li>
+                
                 <li class="has-dropdown" onclick="toggleDropdown(this)">
                     <i class="fas fa-file-alt"></i> Pages <i class="fas fa-chevron-down"></i>
                     <ul class="sub-menu">
                         <li id="tab-manage-homepage"><i class="fas fa-home"></i> Manage Homepage</li>
                     </ul>
                 </li>
+                
                 <li id="tab-theme-settings"><i class="fas fa-paint-roller"></i> Theme & Logo</li>
                 <li onclick="location.reload()" style="color: #ff4757; margin-top: 30px;"><i class="fas fa-sign-out-alt"></i> Logout</li>
             </ul>
         </aside>
 
-        <!-- Main Workspace -->
+        <!-- মেইন কন্টেন্ট এরিয়া -->
         <main class="admin-main">
-            <!-- Theme Settings View (নতুন ফিচার) -->
+
+            <!-- 1. Analytics Dashboard View (ফিক্সড লেআউট) -->
+            <div id="dashboard-view" class="admin-card">
+                <h2 style="margin-bottom: 20px;"><i class="fas fa-tachometer-alt"></i> System Overview</h2>
+                
+                <div class="dash-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                    <div class="stat-box" style="background: #fff; color: #333; border: 1px solid #eee;">
+                        <p>Total Revenue</p>
+                        <h3 id="total-revenue" style="color: #27ae60;">0 BDT</h3>
+                    </div>
+                    <div class="stat-box" style="background: #fff; color: #333; border: 1px solid #eee;">
+                        <p>New Signups</p>
+                        <h3 id="total-students" style="color: #2980b9;">0</h3>
+                    </div>
+                    <div class="stat-box" style="background: #fff; color: #333; border: 1px solid #eee;">
+                        <p>Pending Admissions</p>
+                        <h3 id="pending-count" style="color: #e67e22;">0</h3>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="admin-card" style="margin: 0; border: 1px solid #eee;">
+                        <h4>User Registration Flow</h4>
+                        <canvas id="userGrowthChart"></canvas>
+                    </div>
+                    <div class="admin-card" style="margin: 0; border: 1px solid #eee;">
+                        <h4>Conversion Funnel</h4>
+                        <div id="funnel-container" style="margin-top: 20px;">
+                            <div style="background: #34495e; color: white; padding: 10px; margin-bottom: 5px; border-radius: 5px; width: 100%;">Visitors (100%)</div>
+                            <div style="background: #2980b9; color: white; padding: 10px; margin-bottom: 5px; border-radius: 5px; width: 80%;">Signups (<span id="signup-percent">0</span>%)</div>
+                            <div style="background: #27ae60; color: white; padding: 10px; margin-bottom: 5px; border-radius: 5px; width: 40%;">Paid Students (<span id="paid-percent">0</span>%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Communications & Notices View (নতুন করে সাজানো) -->
+            <div id="messages-view" class="admin-card hidden">
+                <h2 style="margin-bottom: 20px;"><i class="fas fa-envelope"></i> Communications & Notices</h2>
+                
+                <!-- গ্লোবাল নোটিফিকেশন ফর্ম -->
+                <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid var(--soft-gold);">
+                    <h4>Send Global Notification</h4>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">This message will appear on every student's dashboard.</p>
+                    <form id="notification-form" style="display: flex; gap: 10px;">
+                        <input type="text" id="n-message" placeholder="Type notification message here..." required style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                        <button type="submit" class="btn">Send Alert</button>
+                    </form>
+                </div>
+
+                <!-- কন্টাক্ট মেসেজ লিস্ট -->
+                <h4>Contact Page Inquiries</h4>
+                <div class="table-wrapper">
+                    <table id="messages-table">
+                        <thead><tr><th>Name</th><th>Email</th><th>Message content</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. Theme Settings View -->
             <div id="theme-settings-view" class="admin-card hidden">
                 <h3><i class="fas fa-paint-roller"></i> Website Theming & Branding</h3>
                 <p style="margin-bottom: 20px; color: #666;">Change colors, fonts, and logos across the entire website instantly.</p>
                 <form id="theme-settings-form" class="grid">
-                    <div class="form-group">
-                        <label>Website Name</label>
-                        <input type="text" id="s-name" placeholder="Tarbiyah Academy">
-                    </div>
-                    <div class="form-group">
-                        <label>Logo Image URL (Leave blank for text only)</label>
-                        <input type="text" id="s-logo-img" placeholder="https://link-to-your-logo.png">
-                    </div>
-                    <div class="form-group">
-                        <label>Primary Theme Color (Hex)</label>
-                        <input type="color" id="s-primary-color" value="#1B4332" style="height: 45px; padding: 2px;">
-                    </div>
-                    <div class="form-group">
-                        <label>Accent Color (Gold)</label>
-                        <input type="color" id="s-accent-color" value="#D4AF37" style="height: 45px; padding: 2px;">
-                    </div>
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label>Google Font URL</label>
-                        <input type="text" id="s-font-url" placeholder="e.g. https://fonts.googleapis.com/css2?family=Roboto...">
-                    </div>
+                    <div class="form-group"><label>Website Name</label><input type="text" id="s-name" placeholder="Tarbiyah Academy"></div>
+                    <div class="form-group"><label>Logo Image URL</label><input type="text" id="s-logo-img" placeholder="Link (Optional)"></div>
+                    <div class="form-group"><label>Primary Theme Color</label><input type="color" id="s-primary-color" value="#1B4332" style="height: 45px;"></div>
+                    <div class="form-group"><label>Accent Color</label><input type="color" id="s-accent-color" value="#D4AF37" style="height: 45px;"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Google Font URL</label><input type="text" id="s-font-url" placeholder="https://fonts.googleapis.com/..."></div>
                     <button type="submit" class="btn" style="grid-column: span 2;">Deploy New Theme</button>
                 </form>
             </div>
 
-            <!-- Dashboard Analytics View -->
-<div id="dashboard-view" class="admin-card">
-    <h2 style="margin-bottom: 20px;"><i class="fas fa-tachometer-alt"></i> System Overview</h2>
-    
-    <!-- মেইন স্ট্যাটাস কার্ডস -->
-    <div class="dash-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
-        <div class="stat-box" style="background: #fff; color: #333; border: 1px solid #eee;">
-            <p>Total Revenue</p>
-            <h3 id="total-revenue" style="color: #27ae60;">0 BDT</h3>
-        </div>
-        <div class="stat-box" style="background: #fff; color: #333; border: 1px solid #eee;">
-            <p>New Signups</p>
-            <h3 id="total-students" style="color: #2980b9;">0</h3>
-        </div>
-        <div class="stat-box" style="background: #fff; color: #333; border: 1px solid #eee;">
-            <p>Pending Admissions</p>
-            <h3 id="pending-count" style="color: #e67e22;">0</h3>
-        </div>
-    </div>
-
-    <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 20px;">
-        <!-- ইউজার গ্রোথ চার্ট -->
-        <div class="admin-card" style="margin: 0;">
-            <h4>User Registration Flow</h4>
-            <canvas id="userGrowthChart"></canvas>
-        </div>
-
-        <!-- মার্কেটিং ফানেল (Funnel) -->
-        <div class="admin-card" style="margin: 0;">
-            <h4>Conversion Funnel</h4>
-            <div id="funnel-container" style="margin-top: 20px;">
-                <div style="background: #34495e; color: white; padding: 10px; margin-bottom: 5px; border-radius: 5px; width: 100%;">Visitors (100%)</div>
-                <div style="background: #2980b9; color: white; padding: 10px; margin-bottom: 5px; border-radius: 5px; width: 80%;">Signups (<span id="signup-percent">0</span>%)</div>
-                <div style="background: #27ae60; color: white; padding: 10px; margin-bottom: 5px; border-radius: 5px; width: 40%;">Paid Students (<span id="paid-percent">0</span>%)</div>
-            </div>
-             </div>
-         </div>
-    </div>
-            <!-- আপনার আগের সব ভিউ (Admissions, Users, Courses, Blogs) এখানে থাকবে -->
-            <!-- Admissions View -->
-            <div id="admissions-view" class="admin-card">
+            <!-- 4. Admissions View -->
+            <div id="admissions-view" class="admin-card hidden">
                 <h3>New Admission Requests</h3>
                 <div class="table-wrapper">
                     <table id="admissions-table">
@@ -179,7 +191,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
             </div>
 
-            <!-- Student Management View -->
+            <!-- 5. User Management View -->
             <div id="users-view" class="admin-card hidden">
                 <h3>Registered Students</h3>
                 <div class="table-wrapper">
@@ -190,7 +202,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
             </div>
 
-            <!-- Course Creation View -->
+            <!-- 6. Create Course View -->
             <div id="manage-courses-view" class="admin-card hidden">
                 <h3>Publish New Course Card</h3>
                 <form id="course-create-form" class="grid">
@@ -198,33 +210,34 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <input type="text" id="c-tag" placeholder="Tag (e.g. Arabic)" required>
                     <input type="text" id="c-img" placeholder="Image URL" required>
                     <input type="text" id="c-price" placeholder="Price" required>
-                    <textarea id="c-desc" placeholder="Short Description" style="grid"></textarea>
-                    <button type="submit" class="btn">Publish Course</button>
+                    <textarea id="c-desc" placeholder="Short Description" style="grid-column: span 2;"></textarea>
+                    <button type="submit" class="btn" style="grid-column: span 2;">Publish Course</button>
                 </form>
             </div>
-<!-- Manage Quizzes View -->
-            <div id="manage-quiz-view" class="admin-card hidden">
-    <h3>Create Course Quiz</h3>
-    <form id="quiz-create-form" class="form-container" style="max-width: 100%;">
-        <div class="grid">
-            <select id="q-course-tag" required>
-                <option value="Arabic">Arabic</option>
-                <option value="Dawah">Dawah</option>
-                <option value="Psychology">Psychology</option>
-            </select>
-            <input type="text" id="q-question" placeholder="Enter Question" required>
-        </div>
-        <div class="grid" style="margin-top: 10px;">
-            <input type="text" id="q-opt1" placeholder="Option 1" required>
-            <input type="text" id="q-opt2" placeholder="Option 2" required>
-            <input type="text" id="q-opt3" placeholder="Option 3" required>
-            <input type="text" id="q-correct" placeholder="Correct Answer (Exact Match)" required>
-        </div>
-        <button type="submit" class="btn" style="margin-top: 15px;">Add Question</button>
-    </form>
-</div>
 
-            <!-- Video/Lesson Management -->
+            <!-- 7. Manage Quizzes View -->
+            <div id="manage-quiz-view" class="admin-card hidden">
+                <h3>Create Course Quiz</h3>
+                <form id="quiz-create-form" class="form-container" style="max-width: 100%;">
+                    <div class="grid">
+                        <select id="q-course-tag" required>
+                            <option value="Arabic">Arabic</option>
+                            <option value="Dawah">Dawah</option>
+                            <option value="Psychology">Psychology</option>
+                        </select>
+                        <input type="text" id="q-question" placeholder="Enter Question" required>
+                    </div>
+                    <div class="grid" style="margin-top: 10px;">
+                        <input type="text" id="q-opt1" placeholder="Option 1" required>
+                        <input type="text" id="q-opt2" placeholder="Option 2" required>
+                        <input type="text" id="q-opt3" placeholder="Option 3" required>
+                        <input type="text" id="q-correct" placeholder="Correct Answer (Exact Match)" required>
+                    </div>
+                    <button type="submit" class="btn" style="margin-top: 15px;">Add Question</button>
+                </form>
+            </div>
+
+            <!-- 8. Video Management View -->
             <div id="add-video-view" class="admin-card hidden">
                 <h3>Upload New Lesson</h3>
                 <form id="video-upload-form" class="grid">
@@ -236,126 +249,141 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         <option value="Psychology">Psychology</option>
                     </select>
                     <input type="number" id="v-order" placeholder="Serial Order" required>
-                    <button type="submit" class="btn">Add Lesson</button>
+                    <button type="submit" class="btn" style="grid-column: span 2;">Add Lesson</button>
                 </form>
             </div>
 
-            <!-- Blog Article View -->
+            <!-- 9. Blog Management View -->
             <div id="manage-blogs-view" class="admin-card hidden">
                 <h3>Post a New Blog</h3>
                 <form id="blog-upload-form">
                     <input type="hidden" id="edit-blog-id">
-                    <div class="form-group"><label>Title</label>
-                    <input type="text" id="b-title" required>
-                </div>
-                    <div class="form-group">
-                        <label>Cover Image URL</label>
-                    <input type="text" id="b-img" required>
-                </div>
+                    <div class="form-group"><label>Title</label><input type="text" id="b-title" required></div>
+                    <div class="form-group"><label>Cover Image URL</label><input type="text" id="b-img" required></div>
                     <div class="form-group" style="margin-bottom: 60px;">
-                     <label>Content (Full Article)</label>
-                 <!-- Textarea-এর বদলে Quill এর div -->
-                     <div id="quill-editor" style="height: 300px; background: white; color: black; border-radius: 0 0 5px 5px;"></div>
-                </div>
+                        <label>Content (Full Article)</label>
+                        <div id="quill-editor" style="height: 300px; background: white; color: black; border-radius: 0 0 5px 5px;"></div>
+                    </div>
                     <button type="submit" class="btn">Publish Blog Article</button>
                 </form>
-                <h4>Existing Blog Articles</h4>
-                 <table>
-                   <thead><tr><th>Title</th><th>Image</th><th>Action</th></tr></thead>
-                      <tbody id="blogs-table-body"></tbody>
-                   </table>
-                 </div>
+                <div class="table-wrapper" style="margin-top: 40px;">
+                    <h4>Existing Blog Articles</h4>
+                    <table>
+                        <thead><tr><th>Title</th><th>Image</th><th>Action</th></tr></thead>
+                        <tbody id="blogs-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
 
-                 <!-- ১. বই আপলোড ফর্ম -->
-<div id="manage-books-view" class="admin-card hidden">
-    <h3>Upload New PDF Book</h3>
-    <form id="book-upload-form" class="grid">
-        <input type="text" id="bk-title" placeholder="Book Title" required>
-        <input type="text" id="bk-author" placeholder="Author Name" required>
-        <input type="text" id="bk-img" placeholder="Cover Image URL" required>
-        <input type="text" id="bk-pdf" placeholder="PDF File Link (Google Drive/Dropbox)" required>
-        <input type="text" id="bk-price" placeholder="Price (0 for Free)" required>
-        <textarea id="bk-desc" placeholder="Brief Description" style="grid-column: span 2;"></textarea>
-        <button type="submit" class="btn">Publish Book</button>
-    </form>
-    <div class="table-wrapper">
-        <h4>Existing Books</h4>
-        <table>
-            <thead><tr><th>Title</th><th>Price</th><th>Action</th></tr></thead>
-            <tbody id="books-table-body"></tbody>
-        </table>
-    </div>
-</div>
+            <!-- 10. Books Management View -->
+            <div id="manage-books-view" class="admin-card hidden">
+                <h3>Upload New PDF Book</h3>
+                <form id="book-upload-form" class="grid">
+                    <input type="text" id="bk-title" placeholder="Book Title" required>
+                    <input type="text" id="bk-author" placeholder="Author Name" required>
+                    <input type="text" id="bk-img" placeholder="Cover Image URL" required>
+                    <input type="text" id="bk-pdf" placeholder="PDF File Link" required>
+                    <input type="text" id="bk-price" placeholder="Price (0 for Free)" required>
+                    <textarea id="bk-desc" placeholder="Brief Description" style="grid-column: span 2;"></textarea>
+                    <button type="submit" class="btn" style="grid-column: span 2;">Publish Book</button>
+                </form>
+                <div class="table-wrapper" style="margin-top: 30px;">
+                    <h4>Existing Books</h4>
+                    <table>
+                        <thead><tr><th>Title</th><th>Price</th><th>Action</th></tr></thead>
+                        <tbody id="books-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
 
-<!-- ২. রিসার্চ আপলোড ফর্ম -->
-<div id="manage-research-view" class="admin-card hidden">
-    <h3>Publish Research Paper</h3>
-    <form id="research-upload-form" class="grid">
-        <input type="text" id="res-title" placeholder="Research Title" required style="grid-column: span 2;">
-        <input type="text" id="res-link" placeholder="Document Link" required>
-        <input type="text" id="res-category" placeholder="Category">
-        <button type="submit" class="btn">Add Research Paper</button>
-    </form>
-    <div class="table-wrapper">
-    <h4>Existing Research Papers</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="research-table-body"></tbody>
-    </table>
-</div>
-</div>
+            <!-- 11. Research Management View -->
+            <div id="manage-research-view" class="admin-card hidden">
+                <h3>Publish Research Paper</h3>
+                <form id="research-upload-form" class="grid">
+                    <input type="text" id="res-title" placeholder="Research Title" required style="grid-column: span 2;">
+                    <input type="text" id="res-link" placeholder="Document Link" required>
+                    <input type="text" id="res-category" placeholder="Category">
+                    <button type="submit" class="btn" style="grid-column: span 2;">Add Research Paper</button>
+                </form>
+                <div class="table-wrapper" style="margin-top: 30px;">
+                    <h4>Existing Research Papers</h4>
+                    <table>
+                        <thead><tr><th>Title</th><th>Category</th><th>Action</th></tr></thead>
+                        <tbody id="research-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 12. Homepage Elements Management View -->
             <div id="manage-homepage-view" class="admin-card hidden">
-    <h3>Manage Homepage Elements</h3>
-    
-    <!-- ১. স্লাইডার আপডেট -->
-    <div style="border-bottom: 1px solid #ddd; padding-bottom: 20px; margin-bottom: 20px;">
-        <h4>Add Hero Slide</h4>
-        <form id="add-slide-form" class="grid">
-            <input type="text" id="slide-title" placeholder="Slide Title" required>
-            <input type="text" id="slide-img" placeholder="Background Image URL" required>
-            <button type="submit" class="btn">Add Slide</button>
-        </form>
-    </div>
+                <h3>Manage Homepage Elements</h3>
+                <div style="margin-bottom: 40px; border-bottom: 1px solid #ddd; padding-bottom: 20px;">
+                    <h4>Add Hero Slide</h4>
+                    <form id="add-slide-form" class="grid" style="margin-top: 15px;">
+                        <input type="text" id="slide-title" placeholder="Slide Title" required>
+                        <input type="text" id="slide-img" placeholder="Background Image URL" required>
+                        <button type="submit" class="btn">Add Slide</button>
+                    </form>
+                    <div class="table-wrapper">
+                        <table style="margin-top: 15px;">
+                            <thead><tr><th>Title</th><th>Image</th><th>Action</th></tr></thead>
+                            <tbody id="slides-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
 
-    <!-- ২. ভিডিও রিভিউ আপডেট -->
-    <div>
-        <h4>Add Video Review</h4>
-        <form id="add-video-review-form" class="grid">
-            <input type="text" id="rev-name" placeholder="Student Name" required>
-            <input type="text" id="rev-youtube-id" placeholder="YouTube Video ID" required>
-            <button type="submit" class="btn">Add Video Review</button>
-        </form>
-    </div>
-</div>
-            <!-- Teachers Management -->
+                <div>
+                    <h4>Add Video Review</h4>
+                    <form id="add-video-review-form" class="grid" style="margin-top: 15px;">
+                        <input type="text" id="rev-name" placeholder="Student Name" required>
+                        <input type="text" id="rev-youtube-id" placeholder="YouTube Video ID" required>
+                        <button type="submit" class="btn">Add Video Review</button>
+                    </form>
+                    <div class="table-wrapper">
+                        <table style="margin-top: 15px;">
+                            <thead><tr><th>Student Name</th><th>Video ID</th><th>Action</th></tr></thead>
+                            <tbody id="video-reviews-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 13. Teachers Management View -->
             <div id="manage-teachers-view" class="admin-card hidden">
-    <h3>Manage Teachers</h3>
-    <form id="teacher-upload-form" class="grid">
-        <input type="hidden" id="edit-teacher-id">
-        <input type="text" id="t-name" placeholder="Teacher Name" required>
-        <input type="text" id="t-subject" placeholder="Subject/Designation" required>
-        <input type="text" id="t-img" placeholder="Image URL" required>
-        <textarea id="t-bio" placeholder="Short Biography" style="grid-column: span 2;"></textarea>
-        <button type="submit" id="teacher-sub-btn" class="btn">Add Teacher</button>
-    </form>
-    
-        <h4>Existing Teachers</h4>
-        <table>
-            <thead><tr><th>Name</th><th>Subject</th><th>Action</th></tr></thead>
-            <tbody id="teachers-table-body"></tbody>
-        </table>
-    </div>
+                <h3>Manage Faculty</h3>
+                <form id="teacher-upload-form" class="grid">
+                    <input type="hidden" id="edit-teacher-id">
+                    <input type="text" id="t-name" placeholder="Teacher Name" required>
+                    <input type="text" id="t-subject" placeholder="Subject/Designation" required>
+                    <input type="text" id="t-img" placeholder="Image URL" required>
+                    <textarea id="t-bio" placeholder="Short Biography" style="grid-column: span 2;"></textarea>
+                    <button type="submit" id="teacher-sub-btn" class="btn" style="grid-column: span 2;">Add Teacher</button>
+                </form>
+                <div class="table-wrapper" style="margin-top: 30px;">
+                    <h4>Existing Teachers</h4>
+                    <table>
+                        <thead><tr><th>Name</th><th>Subject</th><th>Action</th></tr></thead>
+                        <tbody id="teachers-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
 
         </main>
     </div>
 
-    <!-- ড্রপডাউন কাজ করানোর ছোট্ট স্ক্রিপ্ট -->
+    <!-- Course Assign Modal -->
+    <div id="course-modal" class="hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:30px; border:2px solid gold; border-radius:10px; z-index:3000;">
+        <h4>Give Access to Student</h4>
+        <select id="select-course" style="width:100%; padding:10px; margin:10px 0;">
+            <option value="Arabic">Classical Arabic</option>
+            <option value="Dawah">Modern Dawah</option>
+            <option value="Psychology">Islamic Psychology</option>
+        </select>
+        <button id="confirm-assign" class="btn" style="width:100%;">Confirm Access</button>
+        <button onclick="document.getElementById('course-modal').classList.add('hidden')" class="btn" style="background:red; border:none; width:100%; margin-top:10px;">Close</button>
+    </div>
+
+    <!-- Scripts -->
     <script>
         function toggleDropdown(element) {
             element.classList.toggle('open');
@@ -364,9 +392,5 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <script type="module" src="script.js"></script>
     <script type="module" src="admin.js"></script>
-    <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MSF27WNX"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
 </body>
 </html>

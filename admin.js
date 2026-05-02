@@ -62,7 +62,7 @@ document.getElementById('tab-add-video')?.addEventListener('click', () => showSe
 document.getElementById('tab-manage-teachers')?.addEventListener('click', () => { showSection('manage-teachers-view'); loadTeachers(); });
 document.getElementById('tab-manage-blogs')?.addEventListener('click', () => { showSection('manage-blogs-view'); loadBlogs(); });
 document.getElementById('tab-theme-settings')?.addEventListener('click', () => showSection('theme-settings-view'));
-
+document.getElementById('tab-messages')?.addEventListener('click', () => { showSection('messages-view'); loadMessages(); });
 
 // ৪. Quill.js Rich Text Editor চালু করা (ব্লগের জন্য)
 let quill;
@@ -133,6 +133,36 @@ async function loadTeachers() {
             <button class="btn" onclick="deleteTeacher('${tDoc.id}')" style="padding:5px; background:red;">Delete</button>
         </td></tr>`;
     });
+}
+
+async function loadMessages() {
+    const tbody = document.querySelector('#messages-table tbody');
+    if(!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="3">Loading messages...</td></tr>';
+    
+    try {
+        // Contacts কালেকশন থেকে ডাটা আনবে
+        const snap = await getDocs(collection(db, "Contacts"));
+        tbody.innerHTML = '';
+        
+        if(snap.empty) {
+            tbody.innerHTML = '<tr><td colspan="3">No messages found.</td></tr>';
+            return;
+        }
+
+        snap.forEach(doc => {
+            const data = doc.data();
+            tbody.innerHTML += `
+                <tr>
+                    <td>${data.name}</td>
+                    <td>${data.email}</td>
+                    <td>${data.message}</td>
+                </tr>`;
+        });
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="3" style="color:red;">Error loading messages!</td></tr>';
+    }
 }
 
 
@@ -449,4 +479,65 @@ document.getElementById('add-video-review-form')?.addEventListener('submit', asy
         createdAt: new Date()
     });
     alert("Video Review Added!"); e.target.reset();
+});
+
+// --- Homepage Management (Delete & List) ---
+
+// ট্যাব ক্লিক করলে ডাটা লোড হবে
+document.getElementById('tab-manage-homepage')?.addEventListener('click', () => {
+    showSection('manage-homepage-view');
+    loadHomepageManagementData();
+});
+
+async function loadHomepageManagementData() {
+    // ১. স্লাইডার লিস্ট লোড
+    const slideBody = document.getElementById('slides-table-body');
+    const slideSnap = await getDocs(collection(db, "HomepageSlides"));
+    slideBody.innerHTML = '';
+    slideSnap.forEach(doc => {
+        slideBody.innerHTML += `<tr>
+            <td>${doc.data().title}</td>
+            <td><img src="${doc.data().image}" width="50"></td>
+            <td><button class="btn" onclick="deleteDocById('HomepageSlides', '${doc.id}')" style="background:red; padding:5px;">Delete</button></td>
+        </tr>`;
+    });
+
+    // ২. ভিডিও রিভিউ লিস্ট লোড
+    const videoBody = document.getElementById('video-reviews-table-body');
+    const videoSnap = await getDocs(collection(db, "VideoReviews"));
+    videoBody.innerHTML = '';
+    videoSnap.forEach(doc => {
+        videoBody.innerHTML += `<tr>
+            <td>${doc.data().name}</td>
+            <td>${doc.data().youtubeId}</td>
+            <td><button class="btn" onclick="deleteDocById('VideoReviews', '${doc.id}')" style="background:red; padding:5px;">Delete</button></td>
+        </tr>`;
+    });
+}
+
+// কমন ডিলিট ফাংশন (যদি আগে না থাকে)
+window.deleteDocById = async (collectionName, id) => {
+    if(confirm("Are you sure you want to delete this?")) {
+        try {
+            await deleteDoc(doc(db, collectionName, id));
+            alert("Deleted successfully!");
+            loadHomepageManagementData(); // টেবিল রিফ্রেশ
+        } catch (e) { alert("Error deleting!"); }
+    }
+};
+
+// --- Global Notification Logic ---
+const notifyForm = document.getElementById('notification-form');
+notifyForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('n-message').value;
+    try {
+        // আগের নোটিফিকেশন আপডেট করবে (আমরা আপাতত একটাই লেটেস্ট নোটিশ রাখবো)
+        await setDoc(doc(db, "Settings", "notification"), {
+            message: msg,
+            createdAt: new Date()
+        });
+        alert("Notification sent to all students!");
+        notifyForm.reset();
+    } catch (e) { alert("Error!"); }
 });

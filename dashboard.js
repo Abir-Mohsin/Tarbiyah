@@ -333,3 +333,33 @@ document.getElementById('post-comment-btn').onclick = async () => {
     document.getElementById('comment-input').value = "";
     loadComments();
 };
+
+// লার্নিং রিপোর্ট গ্রাফ তৈরি (Chart.js)
+function renderProgressChart(completedCount, totalCount) {
+    const ctx = document.getElementById('progressChart')?.getContext('2d');
+    if(!ctx) return;
+
+    // যদি আগে কোনো চার্ট থাকে তা ধ্বংস করে নতুনটা বানাবে
+    if(window.myChart) window.myChart.destroy();
+
+    window.myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Completed', 'Remaining'],
+            datasets: [{
+                data: [completedCount, totalCount - completedCount],
+                backgroundColor: ['#D4AF37', '#eee'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+}
+
+// আপনার loadStudentDashboard ফাংশনের ভেতর এটি কল করুন:
+// renderProgressChart(userData.completedLessons?.length || 0, 10); // ১০ এর জায়গায় আপনার মোট লেসন সংখ্যা হবে
