@@ -1,463 +1,167 @@
 /* 
-   Tarbiyah Master Stylesheet
-   Islamic Educational Platform Theme
+   Tarbiyah Premium UI Engine v2.0
+   Formal, Unique, and High-End Professional Design
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&family=Playfair+Display:wght@700&display=swap');
 
-/* --- ১. Variables & Root --- */
 :root {
-    --primary-green: #1B4332;
-    --soft-gold: #D4AF37;
-    --bg-light: #F8F9FA;
-    --text-dark: #333333;
-    --card-bg: #FFFFFF;
-    --nav-bg: #FFFFFF;
-    --footer-bg: #081C15;
-    --transition: all 0.3s ease-in-out;
+    --primary: #064E3B;      /* Deep Emerald */
+    --accent: #C5A059;       /* Champagne Gold */
+    --bg: #F9FAFB;           /* Pearl White */
+    --text-main: #1F2937;    /* Charcoal Gray */
+    --text-muted: #6B7280;
+    --glass: rgba(255, 255, 255, 0.8);
+    --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-body.dark-mode {
-    --primary-green: #2D6A4F;
-    --soft-gold: #E9C46A;
-    --bg-light: #121212;
-    --text-dark: #F1F1F1;
-    --card-bg: #1E1E1E;
-    --nav-bg: #1E1E1E;
-    --footer-bg: #000000;
-}
-
-/* --- ২. Global Styles --- */
-* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--bg-light);
-    color: var(--text-dark);
-    line-height: 1.6;
-    transition: var(--transition);
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: var(--text-main);
+    line-height: 1.7;
+    overflow-x: hidden;
 }
 
-h1, h2, h3, h4 { font-family: 'Amiri', serif; color: var(--primary-green); }
-body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4 { color: var(--soft-gold); }
-
-a { text-decoration: none; color: inherit; }
-ul { list-style: none; }
-.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-
-/* Reset / Base */
-html, body {
-  height: 100%;
-  margin: 0;
+h1, h2, h3 {
+    font-family: 'Playfair Display', serif; /* প্রিমিয়াম সেঁরিফ ফন্ট */
+    color: var(--primary);
 }
 
-/* Layout */
-.wrapper {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-main {
-  flex: 1;
-}
-
-/* Footer */
-footer {
-  background: #222;
-  color: white;
-  text-align: center;
-  padding: 10px;
-}
-
-/* --- ৩. Buttons --- */
-.btn {
-    display: inline-block;
-    padding: 10px 22px;
-    background-color: var(--primary-green);
-    color: #fff !important;
-    border-radius: 5px;
-    border: 2px solid var(--primary-green);
-    cursor: pointer;
-    transition: var(--transition);
-    font-weight: 600;
-    text-align: center;
-}
-
-.btn:hover {
-    background-color: var(--soft-gold);
-    border-color: var(--soft-gold);
-    color: var(--text-dark) !important;
-}
-
-/* --- ৪. Navbar --- */
+/* --- Premium Header --- */
 header {
-    background-color: var(--nav-bg);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
     position: sticky;
     top: 0;
     z-index: 1000;
 }
 
-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; }
-.logo h1 { font-size: 2rem; }
-.nav-links { display: flex; gap: 20px; align-items: center; }
-.nav-links a { font-weight: 600; transition: var(--transition); }
-.nav-links a:hover { color: var(--soft-gold); }
-
-.controls { display: flex; align-items: center; gap: 15px; }
-#dark-mode-toggle { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-dark); }
-.hamburger { display: none; font-size: 1.8rem; cursor: pointer; }
-
-/* --- ৫. Sections & Hero --- */
-.section { padding: 60px 0; animation: slideUp 0.8s ease-out; }
-.section-title { text-align: center; font-size: 2.5rem; margin-bottom: 40px; }
-
-.hero {
-    text-align: center;
-    padding: 100px 20px;
-    background: linear-gradient(rgba(27, 67, 50, 0.85), rgba(27, 67, 50, 0.85)), url('https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&w=1200&q=80') center/cover;
-    color: #fff;
-    animation: fadeIn 1s ease-in;
-}
-.hero h1 { color: var(--soft-gold); font-size: 3.5rem; }
-
-/* --- ৬. Grid & Cards --- */
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
-
-.card {
-    background-color: var(--card-bg);
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+.nav-links a {
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-main);
     transition: var(--transition);
-    text-align: center;
-    border-bottom: 4px solid var(--soft-gold);
-}
-.card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-.card img { width: 100%; border-radius: 10px; height: 200px; object-fit: cover; margin-bottom: 15px; }
-
-/* --- ৭. Forms --- */
-.form-container { max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-.form-group { margin-bottom: 15px; text-align: left; }
-.form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
-.form-group input, .form-group select, .form-group textarea {
-    width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; background-color: var(--bg-light); color: var(--text-dark);
+    position: relative;
 }
 
-/* --- ৮. Admin & Dashboard Features (NEW) --- */
-.hidden { display: none !important; }
-
-/* Tables */
-.table-wrapper { overflow-x: auto; margin: 20px 0; }
-table { width: 100%; border-collapse: collapse; background: var(--card-bg); }
-th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
-th { background-color: var(--primary-green); color: white; }
-body.dark-mode td { border-bottom: 1px solid #444; }
-
-/* Tabs */
-.tab-btn {
-    padding: 10px 20px; border: none; background: #ddd; cursor: pointer; border-radius: 5px; font-weight: bold; margin-right: 5px;
-}
-.tab-btn.active { background: var(--primary-green); color: white; }
-
-/* Dashboard Learning Area */
-.video-player { width: 100%; height: 450px; border-radius: 10px; background: #000; }
-.playlist { background: var(--card-bg); padding: 15px; border-radius: 10px; height: 450px; overflow-y: auto; border: 1px solid #ddd; }
-.playlist-item {
-    padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.3s;
-}
-.playlist-item:hover, .playlist-item.active { background: var(--primary-green); color: white; border-radius: 5px; }
-
-/* Progress Bar */
-.progress-container { margin: 20px 0; background: #ddd; border-radius: 20px; height: 25px; width: 100%; overflow: hidden; }
-.progress-bar { background: var(--soft-gold); height: 100%; width: 0%; transition: width 0.5s; text-align: center; font-weight: bold; line-height: 25px; color: #000; }
-
-/* --- ৯. Footer --- */
-footer { background-color: var(--footer-bg); color: #fff; padding: 40px 0 20px; text-align: center; }
-.footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; text-align: left; margin-bottom: 20px; }
-.footer-content h3 { color: var(--soft-gold); }
-.footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: 20px; }
-
-/* --- ১০. Animations & Responsive --- */
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-@media(max-width: 768px) {
-    .nav-links {
-        display: none; flex-direction: column; position: absolute; top: 70px; left: 0; width: 100%;
-        background-color: var(--nav-bg); padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    .nav-links.active { display: flex; }
-    .hamburger { display: block; }
-    .hero h1 { font-size: 2.2rem; }
-    .video-player { height: 250px; }
-    .playlist { height: auto; }
-}
-
-/* --- Notification & Profile Header --- */
-.user-menu { display: flex; align-items: center; gap: 15px; }
-.notification-bell { position: relative; font-size: 1.2rem; cursor: pointer; color: var(--text-dark); }
-body.dark-mode .notification-bell { color: var(--soft-gold); }
-.notify-badge { position: absolute; top: -5px; right: -8px; background: red; color: white; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 50%; }
-
-/* --- Homepage Slider & Offer Cards --- */
-.slider-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 20px; padding: 20px 0; scrollbar-width: none; }
-.slider-container::-webkit-scrollbar { display: none; }
-.slide-card { min-width: 300px; scroll-snap-align: start; background: var(--card-bg); border-radius: 10px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-top: 4px solid var(--soft-gold); }
-
-.offer-card { background: linear-gradient(135deg, #1B4332, #D4AF37); color: white; border-radius: 10px; padding: 30px; text-align: center; margin: 40px 0; }
-.offer-card h2 { color: white; font-size: 2rem; margin-bottom: 10px; }
-
-/* --- Floating WhatsApp Icon --- */
-.whatsapp-float {
-    position: fixed; width: 60px; height: 60px; bottom: 40px; right: 40px;
-    background-color: #25d366; color: #FFF; border-radius: 50px;
-    text-align: center; font-size: 30px; box-shadow: 2px 2px 3px #999;
-    z-index: 1000; display: flex; align-items: center; justify-content: center;
-    transition: transform 0.3s;
-}
-.whatsapp-float:hover { transform: scale(1.1); color: white; }
-
-/* --- Onboarding Modal --- */
-.onboarding-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8); z-index: 3000; display: flex;
-    justify-content: center; align-items: center;
-}
-.onboarding-box {
-    background: var(--card-bg); padding: 40px; border-radius: 15px;
-    width: 90%; max-width: 600px; text-align: center;
-}
-.keyword-badge {
-    display: inline-block; padding: 8px 15px; margin: 5px; border-radius: 20px;
-    border: 1px solid var(--primary-green); cursor: pointer; transition: 0.3s;
-}
-.keyword-badge.selected { background: var(--primary-green); color: white; }
-
-/* --- Student Dashboard Tabs & Stats --- */
-.dash-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
-.stat-box { background: linear-gradient(135deg, var(--primary-green), #2D6A4F); color: white; padding: 20px; border-radius: 10px; text-align: center; }
-.stat-box h3 { color: var(--soft-gold); font-size: 2rem; margin: 0; }
-
-.dash-nav { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; overflow-x: auto; }
-.dash-tab { padding: 10px 20px; cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent; color: #666; }
-.dash-tab.active { border-bottom-color: var(--soft-gold); color: var(--primary-green); }
-.dash-section { display: none; }
-.dash-section.active { display: block; animation: fadeIn 0.5s ease; }
-
-/* --- Role Selection Modal --- */
-.role-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9); z-index: 4000; display: flex;
-    justify-content: center; align-items: center;
-}
-.role-box {
-    background: var(--card-bg); padding: 40px; border-radius: 15px;
-    width: 90%; max-width: 500px; text-align: center;
-}
-.role-options { display: flex; gap: 20px; justify-content: center; margin-top: 20px; }
-.role-card {
-    border: 2px solid #ddd; padding: 20px; border-radius: 10px;
-    cursor: pointer; flex: 1; transition: 0.3s;
-}
-.role-card:hover { border-color: var(--soft-gold); background: var(--bg-light); }
-.role-card i { font-size: 2.5rem; color: var(--primary-green); margin-bottom: 10px; }
-
-/* --- Header Search Style --- */
-.search-container {
-    display: flex; background: var(--bg-light); border-radius: 25px;
-    padding: 5px 15px; border: 1px solid #ddd; margin: 0 15px; flex: 1; max-width: 400px;
-}
-.search-container input {
-    border: none; background: transparent; padding: 8px; width: 100%; outline: none;
-}
-.search-container button { border: none; background: transparent; cursor: pointer; color: #666; }
-
-@media (max-width: 768px) {
-    .search-container { display: none; } /* মোবাইলে সার্চ লুকানো */
-}
-
-/* কুইজ অপশন ডিজাইন */
-#active-quiz label {
-    display: block;
-    background: var(--bg-light);
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 5px;
-    cursor: pointer;
-}
-#active-quiz input { margin-right: 10px; }
-
-/* সার্টিফিকেট কার্ড */
-.cert-card {
-    background: white;
-    border: 2px solid var(--soft-gold);
-    padding: 20px;
-    text-align: center;
-    border-radius: 10px;
-}
-
-/* Publications Dropdown Styling */
-.dropdown-menu {
-    display: none;
+.nav-links a::after {
+    content: '';
     position: absolute;
-    top: 100%;
+    bottom: -5px;
     left: 0;
-    background-color: var(--card-bg);
-    min-width: 160px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    border-radius: 5px;
-    z-index: 1001;
-    padding: 10px 0;
+    width: 0;
+    height: 2px;
+    background: var(--accent);
+    transition: var(--transition);
 }
 
-.dropdown:hover .dropdown-menu {
-    display: block;
-    animation: fadeIn 0.3s ease;
-}
-
-.dropdown-menu li {
-    padding: 8px 20px;
-}
-
-.dropdown-menu li a {
-    color: var(--text-dark);
-    font-size: 0.9rem;
-    display: block;
-}
-
-.dropdown-menu li a:hover {
-    color: var(--soft-gold);
-}
-
-/* মোবাইল ভিউ ফিক্স */
-@media (max-width: 1100px) {
-    .nav-links li { font-size: 0.85rem; }
-    .search-container { max-width: 180px; }
-}
-
-/* --- Premium Hero Slider --- */
-.hero-slider {
-    position: relative; width: 100%; height: 500px; 
-    overflow: hidden; border-bottom: 5px solid var(--soft-gold);
-}
-.slide {
-    position: absolute; width: 100%; height: 100%; opacity: 0;
-    transition: opacity 1s ease-in-out; display: flex; align-items: center;
-    background-size: cover; background-position: center;
-}
-.slide.active { opacity: 1; }
-.slide-overlay {
-    background: rgba(0, 0, 0, 0.6); width: 100%; height: 100%;
-    display: flex; flex-direction: column; justify-content: center;
-    align-items: center; color: white; text-align: center; padding: 20px;
-}
-.slide-overlay h2 { color: var(--soft-gold); font-size: 3rem; margin-bottom: 15px; }
-
-/* --- Video Review Cards --- */
-.video-review-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px;
-}
-.video-card {
-    background: var(--card-bg); border-radius: 15px; overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 1px solid #eee;
-}
-.video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; }
-.video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-.video-info { padding: 15px; text-align: center; }
-
-@media (max-width: 768px) {
-    .hero-slider { height: 350px; }
-    .slide-overlay h2 { font-size: 2rem; }
-}
-
-.whatsapp-btn {
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    background-color: #25d366;
-    color: rgb(255, 255, 255);
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 30px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    z-index: 9999;
-}
-
-/* Mobile এ একটু বেশি gap */
-@media (max-width: 768px) {
-  .whatsapp-btn {
-    bottom: 110px;
-    right: 15px;
-  }
-}
-
-/* কার্ড চ্যাটজিপিটি দিয়ে ঠিক করার পর এটা যুক্ত করা হয়েছে */
-.admin-card {
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-}
-
-/* Section spacing */
-.section-block {
-    margin-bottom: 40px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
-}
-
-/* Grid form */
-.grid-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: 15px;
-    margin-top: 15px;
-}
-
-/* Inputs */
-.grid-form input {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-}
-
-/* Button */
-.btn {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.btn:hover {
-    background: #0056b3;
-}
-
-/* Table */
-.table-wrapper {
-    margin-top: 25px;
-}
-
-table {
+.nav-links a:hover::after {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
 }
 
-table th, table td {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    text-align: left;
+/* --- Buttons --- */
+.btn {
+    padding: 12px 28px;
+    border-radius: 50px; /* Round Shape */
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: var(--transition);
+    border: none;
+    box-shadow: 0 4px 15px rgba(6, 78, 59, 0.2);
 }
 
-table th {
-    background: #057c62;
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), #0a5f4a);
+    color: white !important;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(6, 78, 59, 0.3);
+}
+
+/* --- Premium Cards --- */
+.card {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    border: 1px solid rgba(0,0,0,0.03);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 5px; height: 100%;
+    background: var(--accent);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+/* --- Animations --- */
+.reveal {
+    animation: reveal 0.8s ease-out forwards;
+}
+
+@keyframes reveal {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Premium Sidebar (Dashboard) --- */
+aside {
+    background: var(--primary) !important;
+    border-radius: 0 30px 30px 0;
+    box-shadow: 10px 0 40px rgba(0,0,0,0.1);
+}
+
+.sidebar-links li {
+    margin: 10px 0;
+    padding: 15px 20px !important;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.sidebar-links li.active {
+    background: var(--accent);
+    color: var(--primary) !important;
+    font-weight: 700;
+}
+
+/* --- Search Bar --- */
+.search-container {
+    background: #f1f1f1;
+    border-radius: 100px;
+    padding: 4px 20px;
+    border: 1px solid transparent;
+    transition: var(--transition);
+}
+
+.search-container:focus-within {
+    background: white;
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(197, 160, 89, 0.2);
+}
+
+.stat-box {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
 }

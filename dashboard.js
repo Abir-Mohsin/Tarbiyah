@@ -64,80 +64,57 @@ setupProfileManagement(userData);
 });
 
 // ৩. ট্যাব সুইচিং লজিক (Updated with Report & Profile)
+// dashboard.js এর ট্যাব লজিক আপডেট
 document.querySelectorAll('.dash-tab').forEach(tab => {
-    tab.addEventListener('click', async () => { // async যোগ করা হয়েছে ডাটা আনার জন্য
+    tab.addEventListener('click', async () => {
         const target = tab.getAttribute('data-target');
 
-        // সব ট্যাব থেকে active ক্লাস সরানো
-        document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
-        // সব সেকশন হাইড করা
-        document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
+        // সাইডবার স্টাইল পরিবর্তন
+        document.querySelectorAll('.dash-tab').forEach(t => {
+            t.style.background = "transparent";
+            t.style.color = "white";
+        });
+        tab.style.background = "var(--soft-gold)";
+        tab.style.color = "black";
 
-        // ক্লিক করা ট্যাব এবং সেকশনকে একটিভ করা
-        tab.classList.add('active');
-        const activeSection = document.getElementById(target);
-        if (activeSection) activeSection.classList.add('active');
+        // সেকশন পরিবর্তন
+        document.querySelectorAll('.dash-section').forEach(s => s.classList.add('hidden'));
+        document.getElementById(target).classList.remove('hidden');
 
-        // --- নির্দিষ্ট ট্যাবের জন্য ডাটা লোড করা ---
-        
-        // ১. কুইজ ড্যাশবোর্ড
-        if (target === 'tab-quiz') loadQuizDashboard();
-        
-        // ২. সার্টিফিকেট ড্যাশবোর্ড
-        if (target === 'tab-certificates') loadCertificateDashboard();
-        
-        // ৩. এক্সপ্লোর বা নতুন কোর্স
-        if (target === 'tab-explore') {
-             const docSnap = await getDoc(currentUserRef);
-             loadExploreCourses(docSnap.data().interests || []);
-        }
-
-        // ৪. লার্নিং রিপোর্ট (নতুন যুক্ত হলো)
-        if (target === 'tab-report') {
-            const docSnap = await getDoc(currentUserRef);
-            loadLearningReport(docSnap.data()); // এটি গ্রাফ লোড করবে
-        }
-
-        // ৫. প্রোফাইল ম্যানেজমেন্ট (নতুন যুক্ত হলো)
-        if (target === 'tab-profile') {
-            const docSnap = await getDoc(currentUserRef);
-            setupProfileManagement(docSnap.data()); // এটি প্রোফাইল ফর্ম সেটআপ করবে
-        }
+        // ডাটা লোড করা
+        if(target === 'tab-books') loadMyBooks();
+        if(target === 'tab-quiz') loadQuizDashboard();
+        if(target === 'tab-certificates') loadCertificateDashboard();
+        if(target === 'tab-report') loadLearningReport();
     });
 });
 
 // ৪. স্টুডেন্ট ড্যাশবোর্ড ডাটা (Stats)
 async function loadStudentDashboard(userData) {
+    // স্ট্যাটাস বক্স আপডেট
     document.getElementById('stat-courses').innerText = userData.myCourses ? userData.myCourses.length : 0;
     document.getElementById('stat-books').innerText = userData.myBooks ? userData.myBooks.length : 0;
-    renderEnrolledCourses(userData.myCourses || []);
-    // dashboard.js এর ভেতরে renderMyBooks নামে নতুন ফাংশন
-async function renderMyBooks(bookList) {
-    const booksArea = document.getElementById('tab-report'); // আপাতত রিপোর্টের নিচে বা আলাদা ট্যাবে দিতে পারেন
-    // যদি আপনি আলাদা ট্যাব 'tab-books' বানিয়ে থাকেন তবে সেখানে দিবেন।
+    document.getElementById('stat-points').innerText = userData.points || 0;
+
+    // কেনা কোর্সের লিস্ট দেখানো
+    renderMyEnrolledItems(userData.myCourses || [], "enrolled-courses-list", "course");
     
-    if (!bookList || bookList.length === 0) return;
+    // কেনা বইয়ের লিস্ট দেখানো (যদি আলাদা আইডি থাকে)
+    renderMyEnrolledItems(userData.myBooks || [], "my-books-list", "book");
+}
+
+function renderMyEnrolledItems(items, targetId, type) {
+    const area = document.getElementById(targetId);
+    if(!area) return;
+    area.innerHTML = items.length === 0 ? `<p>No ${type}s found.</p>` : "";
     
-    let html = `<h3>My Library (Enrolled Books)</h3><div class="grid">`;
-    
-    // ফায়ারস্টোর থেকে বইয়ের লিঙ্কগুলো আনতে হবে
-    const snap = await getDocs(collection(db, "Books"));
-    snap.forEach(doc => {
-        const b = doc.data();
-        if (bookList.includes(b.title)) {
-            html += `
-                <div class="card">
-                    <img src="${b.image}" width="100">
-                    <h3>${b.title}</h3>
-                    <button class="btn" onclick="window.openPdfReader('${b.title}', '${b.pdf}')">Read Now</button>
-                </div>`;
-        }
+    items.forEach(item => {
+        area.innerHTML += `
+            <div class="card">
+                <h3>${item}</h3>
+                <button class="btn" onclick="${type === 'course' ? `startCourse('${item}')` : `openPdf('${item}')`}">${type === 'course' ? 'Continue' : 'Read Now'}</button>
+            </div>`;
     });
-    html += `</div><br><hr><br>`;
-    
-    // এটি ড্যাশবোর্ডের শুরুতে যোগ করে দিবে
-    const learningTab = document.getElementById('tab-learning');
-    learningTab.insertAdjacentHTML('afterbegin', html);
 }
 
 // loadStudentDashboard ফাংশনের ভেতরে এটি কল করুন:
@@ -276,6 +253,31 @@ async function runExam(courseTag) {
             alert(`Score: ${score}%. Need 80% to pass.`);
         }
     };
+
+    // dashboard.js এর ভেতর পয়েন্ট সিস্টেম যুক্ত করা
+document.getElementById('mark-complete-btn')?.addEventListener('click', async () => {
+    if (currentVideoId && !completedVideos.includes(currentVideoId)) {
+        completedVideos.push(currentVideoId);
+        
+        // ১. ভিডিও কমপ্লিশন পয়েন্ট (প্রতি ভিডিওতে ১০ পয়েন্ট)
+        try {
+            const userDoc = await getDoc(currentUserRef);
+            const currentPoints = userDoc.data().points || 0;
+            
+            await updateDoc(currentUserRef, {
+                completedLessons: completedVideos,
+                points: currentPoints + 10 // ১০ পয়েন্ট যোগ হবে
+            });
+
+            // ড্যাশবোর্ডে পয়েন্ট আপডেট করা
+            const pointEl = document.getElementById('stat-points');
+            if(pointEl) pointEl.innerText = currentPoints + 10;
+
+            alert("MashaAllah! You earned 10 points! 🌟");
+            updatePlaylist(); // প্লেলিস্ট রিফ্রেশ
+        } catch(e) { console.error("Point update failed", e); }
+    }
+});
 }
 
 // ৮. সার্টিফিকেট ড্যাশবোর্ড লজিক

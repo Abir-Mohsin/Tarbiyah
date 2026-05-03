@@ -276,3 +276,102 @@ if (searchForm) {
         }
     });
 }
+
+// ইউআরএল থেকে বইয়ের তথ্য চেক করা
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('type') === 'book') {
+    const bookTitle = urlParams.get('title');
+    const bookPrice = urlParams.get('price');
+    
+    // কোর্সের ড্রপডাউনে বইয়ের নাম যোগ করা বা মেসেজ দেওয়া
+    const courseSelect = document.getElementById('course');
+    if (courseSelect) {
+        courseSelect.innerHTML = `<option value="${bookTitle}" selected>Buying Book: ${bookTitle} (${bookPrice} BDT)</option>`;
+    }
+}
+
+// --- অ্যাডমিশন ফর্মের ড্রপডাউন ডাইনামিক করা ---
+async function populateAdmissionDropdown() {
+    const courseSelect = document.getElementById('course');
+    if (!courseSelect) return;
+
+    // যদি ইউআরএল এ অলরেডি কোনো বইয়ের নাম থাকে (Buy Now বাটন থেকে আসলে)
+    const urlParams = new URLSearchParams(window.location.search);
+    const preSelected = urlParams.get('title');
+
+    courseSelect.innerHTML = '<option value="">-- Select Course or Book --</option>';
+
+    try {
+        // ১. কোর্সগুলো যোগ করা
+        const courseSnap = await getDocs(collection(db, "Courses"));
+        courseSelect.innerHTML += `<optgroup label="Academic Courses">`;
+        courseSnap.forEach(doc => {
+            const c = doc.data();
+            courseSelect.innerHTML += `<option value="${c.title}" ${preSelected === c.title ? 'selected' : ''}>${c.title}</option>`;
+        });
+        courseSelect.innerHTML += `</optgroup>`;
+
+        // ২. বইগুলো যোগ করা
+        const bookSnap = await getDocs(collection(db, "Books"));
+        courseSelect.innerHTML += `<optgroup label="PDF Books">`;
+        bookSnap.forEach(doc => {
+            const b = doc.data();
+            courseSelect.innerHTML += `<option value="${b.title}" ${preSelected === b.title ? 'selected' : ''}>Buy Book: ${b.title}</option>`;
+        });
+        courseSelect.innerHTML += `</optgroup>`;
+
+    } catch (e) { console.log("Dropdown load failed", e); }
+}
+
+// পেজ লোড হলে রান হবে
+window.addEventListener('DOMContentLoaded', populateAdmissionDropdown);
+
+// script.js এর ভেতর ল্যাঙ্গুয়েজ লজিক
+const translations = {
+    'en': {
+        'nav_home': 'Home',
+        'nav_courses': 'Courses',
+        'nav_login': 'Student Login',
+        'hero_title': 'Empowering the Ummah',
+        'welcome_msg': 'Assalamu Alaikum',
+    },
+    'bn': {
+        'nav_home': 'হোম',
+        'nav_courses': 'কোর্সসমূহ',
+        'nav_login': 'লগইন করুন',
+        'hero_title': 'উম্মাহর ক্ষমতায়ন',
+        'welcome_msg': 'আসসালামু আলাইকুম',
+    }
+};
+
+window.changeLanguage = (lang) => {
+    localStorage.setItem('lang', lang);
+    document.querySelectorAll('[data-lang-key]').forEach(el => {
+        const key = el.getAttribute('data-lang-key');
+        if (translations[lang][key]) {
+            el.innerText = translations[lang][key];
+        }
+    });
+    document.getElementById('lang-switch').innerText = (lang === 'bn' ? 'EN' : 'বাং');
+};
+
+// ব্যবহারের নিয়ম: HTML এ গিয়ে নিচের মতো লিখতে হবে
+// <a href="index.html" data-lang-key="nav_home">Home</a>
+
+// গ্লোবাল সার্চ লজিক
+window.performGlobalSearch = async () => {
+    const queryStr = document.getElementById('site-search').value.toLowerCase();
+    if(!queryStr) return;
+
+    // ইউজারকে একটি সার্চ রেজাল্ট পেজে নিয়ে যাওয়া ভালো, 
+    // তবে আপাতত আমরা কোর্স পেজেই সব দেখানোর ব্যবস্থা করছি
+    window.location.href = `courses.html?search=${encodeURIComponent(queryStr)}`;
+};
+
+// courses.js এ গিয়ে এই কুয়েরি হ্যান্ডেল করতে হবে
+const urlParams = new URLSearchParams(window.location.search);
+const searchTerm = urlParams.get('search')?.toLowerCase();
+
+if (searchTerm) {
+    // এখানে আপনার কোর্সের পাশাপাশি বই এবং রিসার্চও ফিল্টার করে দেখাবে
+}

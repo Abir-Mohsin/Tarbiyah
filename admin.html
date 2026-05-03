@@ -390,16 +390,27 @@
     </div>
 
     <!-- Course Assign Modal -->
-    <div id="course-modal" class="hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:30px; border:2px solid gold; border-radius:10px; z-index:3000;">
-        <h4>Give Access to Student</h4>
-        <select id="select-course" style="width:100%; padding:10px; margin:10px 0;">
-            <option value="Arabic">Classical Arabic</option>
-            <option value="Dawah">Modern Dawah</option>
-            <option value="Psychology">Islamic Psychology</option>
-        </select>
-        <button id="confirm-assign" class="btn" style="width:100%;">Confirm Access</button>
-        <button onclick="document.getElementById('course-modal').classList.add('hidden')" class="btn" style="background:red; border:none; width:100%; margin-top:10px;">Close</button>
-    </div>
+    <!-- পপআপ মোডাল (কোর্স/বই অ্যাসাইন করার জন্য) -->
+<div id="course-modal" class="hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:30px; border:2px solid gold; border-radius:10px; z-index:3000; width: 350px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+    <h4 style="color: black;">Give Student Access</h4>
+    <br>
+    
+    <label style="color: black;">Access Type:</label>
+    <select id="assign-type" style="width:100%; padding:10px; margin: 10px 0;" onchange="updateAssignDropdown()">
+        <option value="course">Course</option>
+        <option value="book">PDF Book</option>
+    </select>
+
+    <label style="color: black;">Select Item:</label>
+    <select id="assign-item-list" style="width:100%; padding:10px; margin: 10px 0;">
+        <!-- এখানে ডাটাবেস থেকে ডাইনামিকালি আইটেম আসবে -->
+        <option>Loading...</option>
+    </select>
+
+    <br>
+    <button id="confirm-assign" class="btn" style="width: 100%;">Confirm Access</button>
+    <button onclick="document.getElementById('course-modal').classList.add('hidden')" class="btn" style="background:red; border:none; width: 100%; margin-top: 10px;">Cancel</button>
+</div>
 
     <!-- Scripts -->
     <script>

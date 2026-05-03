@@ -580,3 +580,52 @@ document.getElementById('live-class-form')?.addEventListener('submit', async (e)
         e.target.reset();
     } catch (e) { alert("Error scheduling class."); }
 });
+
+// --- ডাইনামিক অ্যাসাইন ড্রপডাউন লজিক ---
+
+window.openAssignModal = async (uid) => {
+    window.selectedUserUid = uid;
+    document.getElementById('course-modal').classList.remove('hidden');
+    updateAssignDropdown(); // ড্রপডাউন লোড করবে
+};
+
+window.updateAssignDropdown = async () => {
+    const type = document.getElementById('assign-type').value;
+    const itemList = document.getElementById('assign-item-list');
+    itemList.innerHTML = "<option>Loading...</option>";
+
+    try {
+        // যদি টাইপ কোর্স হয় তবে 'Courses' থেকে আনবে, নাহলে 'Books' থেকে
+        const collectionName = (type === 'course') ? "Courses" : "Books";
+        const snap = await getDocs(collection(db, collectionName));
+        
+        itemList.innerHTML = "";
+        snap.forEach(doc => {
+            const data = doc.data();
+            const optionText = data.title || data.name;
+            itemList.innerHTML += `<option value="${optionText}">${optionText}</option>`;
+        });
+    } catch (e) {
+        itemList.innerHTML = "<option>Error loading items</option>";
+    }
+};
+
+// কনফার্ম বাটন লজিক (আপডেট করা)
+document.getElementById('confirm-assign')?.addEventListener('click', async () => {
+    const type = document.getElementById('assign-type').value;
+    const itemName = document.getElementById('assign-item-list').value;
+    
+    if (window.selectedUserUid && itemName) {
+        const userRef = doc(db, "Users", window.selectedUserUid);
+        try {
+            if (type === 'course') {
+                await updateDoc(userRef, { myCourses: arrayUnion(itemName), status: "Active" });
+            } else {
+                await updateDoc(userRef, { myBooks: arrayUnion(itemName), status: "Active" });
+            }
+            alert("Success! Access granted to " + itemName);
+            document.getElementById('course-modal').classList.add('hidden');
+            loadUsers(); // টেবিল রিফ্রেশ
+        } catch (e) { alert("Error assigning!"); }
+    }
+});
